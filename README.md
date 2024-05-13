@@ -1,2 +1,40 @@
-# asthma_workshop
-A Shiny app to allow students to add their data from Asthma workshop and interactively explore
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# AsthmaWorkshop
+
+<!-- badges: start -->
+
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+<!-- badges: end -->
+
+The goal of AsthmaWorkshop is to provide a interactive tool to allow
+students participating in the
+
+## Installation
+
+You can install the development version of AsthmaWorkshop from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("PSI-schools/AsthmaWorkshop")
+```
+
+## Run App
+
+If you wish to run the application on your own computer you can do so by
+running the following code:
+
+``` r
+library(AsthmaWorkshop)
+AsthmaWorkshop::run_app(s)
+```
+
+## Code of Conduct
+
+Please note that the AsthmaWorkshop project is released with a
+[Contributor Code of
+Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html).
+By contributing to this project, you agree to abide by its terms.

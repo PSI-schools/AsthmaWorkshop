@@ -1,13 +1,10 @@
 Package: AsthmaWorkshop
-Title: An Amazing Shiny App
+Title: Asthma_Workshop
 Version: 0.0.0.9000
-Authors@R: 
-    person(given = "firstname",
-           family = "lastname",
-           role = c("aut", "cre"),
-           email = "your@email.com")
-Description: What the package does (one paragraph).
-License: What license is it under?
+Authors@R: person('Gareth', 'Burns', email = 'gareth.burns@exploristics.com', role = c('cre', 'aut'))
+Description: A Shiny app for the PSI Schools initiative AsthmaWorkshop. 
+  This allows students to input and explore their on data on the Asthma Workshop.
+License: MIT + file LICENSE
 Imports: 
     config (>= 0.3.2),
     golem (>= 0.4.1),
@@ -15,3 +12,8 @@ Imports:
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
+URL: https://github.com/PSI-schools/AsthmaWorkshop
+BugReports: https://github.com/PSI-schools/AsthmaWorkshop/issues
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
