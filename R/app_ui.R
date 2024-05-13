@@ -3,7 +3,7 @@
 #' @param request Internal parameter for `{shiny}`.
 #'     DO NOT REMOVE.
 #' @import shiny
-#' @importFrom bslib page_navbar
+#' @importFrom bslib page_navbar nav_panel
 #' @noRd
 
 app_ui <- function(request) {
@@ -12,7 +12,8 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     # Your application UI logic
     page_navbar(title = "Asthma Workshop", 
-                theme = psi_theme)
+                theme = psi_theme, 
+                nav_panel(icon("home"), mod_landing_page_ui("home")))
   )
 }
 
@@ -25,10 +26,8 @@ app_ui <- function(request) {
 #' @importFrom golem add_resource_path activate_js favicon bundle_resources
 #' @noRd
 golem_add_external_resources <- function() {
-  add_resource_path(
-    "www",
-    app_sys("app/www")
-  )
+  add_resource_path("img",
+                    system.file("app/img", package = "AsthmaWorkshop"))
 
   tags$head(
     favicon(),

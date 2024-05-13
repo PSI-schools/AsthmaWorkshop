@@ -3,6 +3,7 @@
 export(run_app)
 import(shiny)
 importFrom(bslib,bs_theme)
+importFrom(bslib,nav_panel)
 importFrom(bslib,page_navbar)
 importFrom(golem,activate_js)
 importFrom(golem,add_resource_path)
