@@ -26,9 +26,8 @@ mod_landing_page_ui <- function(id){
              img(src = "img/asthma.jpg", contentType = "image/jpg",
                  height = "auto",
                  width = "auto",
-                 alt = "Patient recievig treatment for asthma"))
+                 alt = "Patient recieving treatment for asthma"))
     )
- 
   )
 }
     
@@ -38,12 +37,9 @@ mod_landing_page_ui <- function(id){
 mod_landing_page_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+    
+    # No server logic at present
+    
  
   })
 }
-    
-## To be copied in the UI
-# mod_landing_page_ui("landing_page_1")
-    
-## To be copied in the server
-# mod_landing_page_server("landing_page_1")
