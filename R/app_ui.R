@@ -3,15 +3,16 @@
 #' @param request Internal parameter for `{shiny}`.
 #'     DO NOT REMOVE.
 #' @import shiny
+#' @importFrom bslib page_navbar
 #' @noRd
+
 app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    fluidPage(
-      h1("AsthmaWorkshop")
-    )
+    page_navbar(title = "Asthma Workshop", 
+                theme = psi_theme)
   )
 }
 
