@@ -26,7 +26,43 @@ mod_landing_page_ui <- function(id){
              img(src = "img/asthma.jpg", contentType = "image/jpg",
                  height = "auto",
                  width = "auto",
-                 alt = "Patient recieving treatment for asthma"))
+                 alt = "Patient recieving treatment for asthma"), 
+             div(style = "text-align: center;", # Center-align the logos
+                 fluidRow(
+                   column(
+                     4,
+                     tags$a(
+                       href = "https://psiweb.org/",
+                       target =
+                         "_blank",
+                       HTML(
+                         '<i class="fas fa-info-circle fa-3x" style="color: #00638e;"></i>'
+                       )
+                     )
+                   ),
+                   column(
+                     4,
+                     tags$a(
+                       href = "https://twitter.com/PSIUpdate",
+                       target =
+                         "_blank",
+                       HTML(
+                         '<i class="fab fa-twitter fa-3x" style="color: #00638e;"></i>'
+                       )
+                     )
+                   ),
+                   column(
+                     4,
+                     tags$a(
+                       href = "https://www.linkedin.com/company/psi-statisticians-in-the-pharmaceutical-industry/",
+                       target =
+                         "_blank",
+                       HTML(
+                         '<i class="fab fa-linkedin fa-3x" style="color: #00638e;"></i>'
+                       )
+                     )
+                   )
+                 )))
     )
   )
 }
