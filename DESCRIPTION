@@ -13,6 +13,7 @@ Imports:
     bslib,
     config (>= 0.3.2),
     golem (>= 0.4.1),
+    htmltools,
     reactable,
     shiny (>= 1.8.1.1),
     shinyWidgets

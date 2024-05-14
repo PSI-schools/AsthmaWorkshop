@@ -44,7 +44,7 @@ mod_data_entry_ui <- function(id){
 #' data_entry Server Functions
 #'
 #' @noRd 
-mod_data_entry_server <- function(id){
+mod_data_entry_server <- function(id, data, application_state){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
