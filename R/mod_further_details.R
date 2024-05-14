@@ -16,7 +16,7 @@ mod_further_details_ui <- function(id) {
     style = css(grid_template_columns = "2fr 1fr"),
     heights_equal = "row",
     card(
-      card_header("Tell me more", class = "bg-primary"),
+      card_header(h2("Tell me more"), class = "bg-primary"),
       card_body(
         h3("How to become a Statistician or Statistical Programmer"),
         p(
