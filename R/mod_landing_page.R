@@ -16,7 +16,7 @@ mod_landing_page_ui <- function(id) {
     heights_equal = "row",
     card(card_header(h2(
       "Make a New Asthma Medicine"
-    )),
+    ), class = "bg-primary"),
     card_body(
       p(
         "Have you ever wondered how statistics could be useful in the real world?"

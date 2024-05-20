@@ -11,7 +11,7 @@
 
 mod_admin_ui <- function(id) {
   ns <- NS(id)
-  page_fluid(card(card_header(h2("Admin")),
+  page_fluid(card(card_header(h2("Admin"), class = "bg-primary"),
                   card_body(
                     textInput(ns("googlesheets"), label = "Google Sheets url"),
                     actionBttn(ns("update"))

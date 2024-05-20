@@ -12,7 +12,8 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     # Your application UI logic
     page_navbar(title = "Asthma Workshop", 
-                theme = psi_theme, 
+                theme = psi_theme,
+                bg = "#00638e",
                 nav_panel(icon("home"), mod_landing_page_ui("home")), 
                 nav_panel("Data Entry", mod_data_entry_ui("data_entry")), 
                 nav_spacer(), 

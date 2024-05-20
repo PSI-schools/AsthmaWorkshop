@@ -20,5 +20,4 @@ app_server <- function(input, output, session) {
   mod_data_entry_server("data_entry", data = data, application_state = applicationState)
   mod_admin_server("admin", application_state = applicationState)
   
-  
 }
