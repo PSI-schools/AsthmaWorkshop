@@ -27,8 +27,10 @@ golem::add_module(name = "further_details", with_test = TRUE)
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
-golem::add_fct("helpers", with_test = TRUE)
-golem::add_utils("PSITheme", with_test = TRUE)
+golem::add_utils("saveData")
+golem::add_utils("loadData")
+golem::add_utils("checkFunction")
+
 
 ## External resources
 ## Creates .js and .css files at inst/app/www

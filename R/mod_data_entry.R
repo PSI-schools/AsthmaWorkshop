@@ -50,7 +50,7 @@ mod_data_entry_ui <- function(id){
 #' @noRd 
 
  
-mod_data_entry_server <- function(id, data, application_state, user_choices){
+mod_data_entry_server <- function(id, data, class_data, application_state, user_choices){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -74,10 +74,10 @@ mod_data_entry_server <- function(id, data, application_state, user_choices){
     })
     
     output$class_table <- renderReactable({
-      if (nrow(data$ClassData) <= 0) {
+      if (nrow(class_data()) <= 0) {
         validate("Please enter some values")
       }
-      reactable(data = data$ClassData)
+      reactable(data = class_data())
     })
     
     
@@ -100,7 +100,7 @@ mod_data_entry_server <- function(id, data, application_state, user_choices){
           type = "warning"
         )
       } else {
-        saveData(url = application_state$GoogleSheets, data = data$ClassData)
+        saveData(id = application_state$GoogleSheets, data = data$GroupData)
         sendSweetAlert(
           session = session,
           title = "Success: Data Upload",
@@ -109,8 +109,6 @@ mod_data_entry_server <- function(id, data, application_state, user_choices){
           type = "success"
         )
       }
-      
-
     })
   })
 }
