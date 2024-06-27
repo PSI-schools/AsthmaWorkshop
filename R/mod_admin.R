@@ -69,7 +69,6 @@ mod_admin_server <- function(id, application_state, user_choices) {
     
     observeEvent(input$update,
                  {
-                   browser()
                    if (!identical(application_state$google_sheets, input$googlesheets)) {
                      application_state$google_sheets <- input$googlesheets
                    }
