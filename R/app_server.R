@@ -104,7 +104,8 @@ app_server <- function(input, output, session) {
   )
   mod_view_data_server("view_data", 
                        data = data,
-                       class_data = classData)
+                       class_data = classData, 
+                       user_choices = userChoices)
   mod_admin_server("admin",
                    application_state = applicationState,
                    user_choices = userChoices)

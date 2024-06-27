@@ -60,7 +60,7 @@ mod_view_data_ui <- function(id) {
 #' view_data Server Functions
 #'
 #' @noRd
-mod_view_data_server <- function(id, class_data, data) {
+mod_view_data_server <- function(id, class_data, data, user_choices) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -94,7 +94,7 @@ mod_view_data_server <- function(id, class_data, data) {
                          )) +
             geom_histogram(color = MyPallette$black,
                            alpha = 0.7) +
-            labs(x = "Peak Expiratory Flow (L/min)",
+            labs(x = user_choices$ValueLabel,
                  y = "Frequency Density") +
             scale_fill_manual(
               "Treatment",
@@ -144,11 +144,11 @@ mod_view_data_server <- function(id, class_data, data) {
             geom_boxplot(width = 1,
                          color = MyPallette$black,
                          alpha = 0.7) +
-            labs(x = "Peak Expiratory Flow (L/min)") +
+            labs(x = user_choices$ValueLabel) +
             scale_fill_manual(
               "Treatment",
               labels = c("Placebo", "Drug"),
-              values = c(col_pla, col_drug)
+              values = c(MyPallette$col_pla, MyPallette$col_drug)
             ) +
             facet_grid(rows = vars(Treatment))
           print(plot)
@@ -169,8 +169,8 @@ mod_view_data_server <- function(id, class_data, data) {
             # geom_segment(x=median(data_p$pef), xend=median(data_p$pef), y=-0.5, yend=1, color=col_pla, linetype="dashed", size=0.75) +
             # geom_segment(x=median(data_d$pef), xend=median(data_d$pef), y=-0.5, yend=1, color=col_drug, linetype="dashed", size=0.75) +
             scale_color_manual("Treatment",
-                               values = c(col_pla, col_drug)) +
-            labs(x = "Peak Expiratory Flow (L/min)")
+                               values = c(MyPallette$col_pla, MyPallette$col_drug)) +
+            labs(x = user_choices$ValueLabel)
           scale_y_continuous("Proportion",
                              limits = c(0, 1),
                              breaks = seq(0, 1, by = 0.1))
@@ -185,7 +185,7 @@ mod_view_data_server <- function(id, class_data, data) {
               size = 10,
               alpha = 0.7
             ) +
-            labs(x = "Peak Expiratory Flow",
+            labs(x = user_choices$ValueLabel,
                  y = "Height (cm)") +
             scale_fill_manual(
               "Treatment",
@@ -244,20 +244,20 @@ mod_view_data_server <- function(id, class_data, data) {
                        size = 1) +
             labs(x = "Effect of Treatment (Drug - Control)",
                  y = "Group") +
-            # scale_color_manual(values = c("0" = MyPallette$red, "1" = MyPallette$green)) +
-            # scale_fill_manual(values = c("0" = MyPallette$red, "1" = MyPallette$green)) +
+            scale_color_manual(values = c("0" = MyPallette$red, "1" = MyPallette$green)) +
+            scale_fill_manual(values = c("0" = MyPallette$red, "1" = MyPallette$green)) +
             annotate(
               "text",
-              x = -40,
+              x = -1,
               y = 0.8,
               color = MyPallette$blue,
               label = "Placebo Better",
-              hjust = 0,
+              hjust = 1,
               size = 7
             ) +
             annotate(
               "text",
-              x = 5,
+              x = 1,
               y = 0.8,
               color = MyPallette$blue,
               label = "Drug Better",
