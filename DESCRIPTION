@@ -21,9 +21,9 @@ Imports:
     googlesheets4,
     htmltools,
     reactable,
-    reshape2,
     shiny (>= 1.8.1.1),
     shinyWidgets,
+    tidyr,
     uuid
 Suggests: 
     testthat (>= 3.0.0)
