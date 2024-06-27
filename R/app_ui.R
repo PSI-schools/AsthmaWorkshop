@@ -16,6 +16,7 @@ app_ui <- function(request) {
                 bg = "#00638e",
                 nav_panel(icon("home"), mod_landing_page_ui("home")), 
                 nav_panel("Data Entry", mod_data_entry_ui("data_entry")), 
+                nav_panel("View Data", mod_view_data_ui("view_data")), 
                 nav_spacer(), 
                 nav_panel("Find Out More", mod_further_details_ui("further_details")),
                 nav_panel(icon("gear"), mod_admin_ui("home")))
