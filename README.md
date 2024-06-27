@@ -9,8 +9,11 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-The goal of AsthmaWorkshop is to provide a interactive tool to allow
-students participating in the
+The goal of AsthmaWorkshop application is to provide a interactive tool for the PSI Schools Initiative whereby workshops allow students to gain skills in 
+
+- Data Entry
+- Data Exploration
+- Statistical Concepts
 
 ## Installation
 
