@@ -42,6 +42,7 @@ app_server <- function(input, output, session) {
   
   userChoices <-
     reactiveValues(
+      ValueLabel = "Peak Expiratory Flow",
       Group = c("Group A", "Group B", "Group C"),
       Treatment = c("Control", "Placebo")
     )

@@ -19,7 +19,7 @@ app_ui <- function(request) {
                 nav_panel("View Data", mod_view_data_ui("view_data")), 
                 nav_spacer(), 
                 nav_panel("Find Out More", mod_further_details_ui("further_details")),
-                nav_panel(icon("gear"), mod_admin_ui("home")))
+                nav_panel(icon("gear"), mod_admin_ui("admin")))
   )
 }
 

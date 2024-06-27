@@ -15,6 +15,7 @@ mod_admin_ui <- function(id) {
     card_header(h2("Admin"), class = "bg-primary"),
     card_body(
       textInput(ns("googlesheets"), label = "Google Sheets url"),
+      textInput(ns("value_label"), label = "Measurement Label", placeholder = "Peak Expiratory Flow"),
       checkboxGroupButtons(
         inputId = ns("treatment"),
         label = "Treatment",
@@ -53,8 +54,7 @@ mod_admin_ui <- function(id) {
                     lib = "glyphicon")
         )
       ),
-      actionBttn(inputId = ns("update"), block = TRUE)
-    )
+      actionBttn(inputId = ns("update"), label = "Update"))
   ))
 }
 
@@ -72,14 +72,12 @@ mod_admin_server <- function(id, application_state, user_choices) {
                    if (!identical(application_state$google_sheets, input$googlesheets)) {
                      application_state$google_sheets <- input$googlesheets
                    }
-                   
+                   user_choices$ValueLabel <- input$value_label
                    user_choices$Treatment <- input$treatment
                    user_choices$Group <- input$group
                    
                  },
                  ignoreNULL = TRUE,
                  ignoreInit = TRUE)
-    
-    
   })
 }
