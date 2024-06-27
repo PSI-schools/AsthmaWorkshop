@@ -5,11 +5,11 @@
 #' @examples
 #' 1 %not_in% 1:10
 #' not_null(NULL)
-`%not_in%` <- Negate(`%in%`)
+`%notin%` <- Negate(`%in%`)
 
-not_null <- Negate(is.null)
+notnull <- Negate(is.null)
 
-not_na <- Negate(is.na)
+notna <- Negate(is.na)
 
 #' Removes the null from a vector
 #'
