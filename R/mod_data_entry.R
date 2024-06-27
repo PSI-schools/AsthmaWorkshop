@@ -65,6 +65,7 @@ mod_data_entry_ui <- function(id) {
 #' data_entry Server Functions
 #' @importFrom shinyWidgets updateRadioGroupButtons
 #' @importFrom uuid UUIDgenerate
+#' @importFrom reactable reactable colDef
 #' @noRd
 
 
@@ -106,46 +107,58 @@ mod_data_entry_server <-
       
       output$group_table <- renderReactable({
         validate(need(nrow(data$GroupData) > 0, "Please enter some values"))
-        
-        reactable(data = data$GroupData)
+        reactable(data = data$GroupData,
+                  columns = list(
+                    ID = colDef(show = FALSE),
+                    Value = colDef(name = user_choices$ValueLabel)
+                  ))
       })
       
       output$class_table <- renderReactable({
-        validate(need(nrow(class_data()) > 0, 
-                      "No data found for class. Maybe you've not uploaded your data yet?"))
-        reactable(data = class_data())
+        validate(need(
+          nrow(class_data()) > 0,
+          "No data found for class. Maybe you've not uploaded your data yet?"
+        ))
+        reactable(data = class_data(),
+                  columns = list(
+                    ID = colDef(show = FALSE),
+                    Value = colDef(name = user_choices$ValueLabel)
+                  ))
       })
       
       
-      observeEvent(input$upload, {
-        if (is.null(application_state$GoogleSheets)) {
-          sendSweetAlert(
-            session = session,
-            title = "Googlesheets",
-            text = "If you wish to use multiple computers, these data need stored on Googlesheets.
+      observeEvent(input$upload,
+                   {
+                     if (is.null(application_state$GoogleSheets)) {
+                       sendSweetAlert(
+                         session = session,
+                         title = "Googlesheets",
+                         text = "If you wish to use multiple computers, these data need stored on Googlesheets.
           See the user guide for help setting up Googlesheets",
-            type = "info"
-          )
-        } else if (isTRUE((!isTruthy(data$ClassData) &&
-                           nrow(data$ClassData) > 0))) {
-          sendSweetAlert(
-            session = session,
-            title = "No Data to Upload",
-            text = "Before uploading data to Googlesheets, please make sure you've entered
+                         type = "info"
+                       )
+                     } else if (isTRUE((!isTruthy(data$ClassData) &&
+                                        nrow(data$ClassData) > 0))) {
+                       sendSweetAlert(
+                         session = session,
+                         title = "No Data to Upload",
+                         text = "Before uploading data to Googlesheets, please make sure you've entered
           all the data from yout group",
-            type = "warning"
-          )
-        } else {
-          saveData(id = application_state$GoogleSheets,
-                   data = data$GroupData)
-          sendSweetAlert(
-            session = session,
-            title = "Success: Data Upload",
-            text = "The Group Data was successfully uploaded. Once each group has uploaded
+                         type = "warning"
+                       )
+                     } else {
+                       saveData(id = application_state$GoogleSheets,
+                                data = data$GroupData)
+                       sendSweetAlert(
+                         session = session,
+                         title = "Success: Data Upload",
+                         text = "The Group Data was successfully uploaded. Once each group has uploaded
         their data be sure to compare results!",
-            type = "success"
-          )
-        }
-      })
+                         type = "success"
+                       )
+                     }
+                   },
+                   ignoreNULL = TRUE,
+                   ignoreInit = TRUE)
     })
   }
