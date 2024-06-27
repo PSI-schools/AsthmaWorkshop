@@ -12,14 +12,14 @@
 
 mod_data_entry_ui <- function(id) {
   ns <- NS(id)
-  page_sidebar(
-    sidebar = sidebar(
-      width = "30%",
-      "Enter Patient Details",
+  page_sidebar(sidebar = sidebar(
+    width = "30%",
+    wellPanel(
+      h2("Enter Patient Details"),
       radioGroupButtons(
         inputId = ns("group"),
-        label = "Class Group",
-        choices = c("Group A", "Group B", "Group C"),
+        label = "Group",
+        choices = c("A", "B", "C"),
         status = "primary"
       ),
       textInput(ns("name"), label = "Your Initials"),
@@ -29,7 +29,7 @@ mod_data_entry_ui <- function(id) {
         choices = c("Placebo", "Condition"),
         status = "primary"
       ),
-      helpText("* Random allocation (coin toss or dice roll"),
+      helpText("* Random allocation (coin toss or dice roll)"),
       numericInput(
         inputId = ns("height"),
         label = "Height (cm)",
@@ -50,16 +50,16 @@ mod_data_entry_ui <- function(id) {
         min = 0L
       ),
       actionButton(inputId = ns("add"), label = "Add")
-    ),
-    navset_card_tab(
-      nav_panel(
-        "Group Data",
-        reactableOutput(ns("group_table")),
-        actionButton(inputId = ns("upload"), label = "Upload")
-      ),
-      nav_panel("Class Data", reactableOutput(ns("class_table"))),
     )
-  )
+  ),
+  navset_card_tab(
+    nav_panel(
+      "Group Data",
+      reactableOutput(ns("group_table")),
+      actionButton(inputId = ns("upload"), label = "Upload")
+    ),
+    nav_panel("Class Data", reactableOutput(ns("class_table"))),
+  ))
 }
 
 #' data_entry Server Functions
@@ -92,7 +92,7 @@ mod_data_entry_server <-
       )
       
       observeEvent(input$add, {
-        data$GroupData[nrow(data$GroupData) + 1, ] <-
+        data$GroupData[nrow(data$GroupData) + 1,] <-
           list(
             UUIDgenerate(),
             input$name,
@@ -105,16 +105,14 @@ mod_data_entry_server <-
       }, ignoreInit = TRUE)
       
       output$group_table <- renderReactable({
-        if (nrow(data$GroupData) <= 0) {
-          validate("Please enter some values")
-        }
+        validate(need(nrow(data$GroupData) > 0, "Please enter some values"))
+        
         reactable(data = data$GroupData)
       })
       
       output$class_table <- renderReactable({
-        if (nrow(class_data()) <= 0) {
-          validate("Please enter some values")
-        }
+        validate(need(nrow(class_data()) > 0, 
+                      "No data found for class. Maybe you've not uploaded your data yet?"))
         reactable(data = class_data())
       })
       
