@@ -1,3 +1,3 @@
 # AsthmaWorkshop (development version)
 
-* Initial CRAN submission.
+* Initial Draft.

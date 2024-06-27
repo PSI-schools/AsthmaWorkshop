@@ -1,6 +1,6 @@
 Package: AsthmaWorkshop
 Title: Asthma_Workshop
-Version: 0.0.0.9000
+Version: 0.9
 Authors@R: 
     person("Gareth", "Burns", , "gareth.burns@exploristics.com", role = c("cre", "aut"))
 Description: A Shiny app for the PSI Schools initiative AsthmaWorkshop.
@@ -9,16 +9,22 @@ Description: A Shiny app for the PSI Schools initiative AsthmaWorkshop.
 License: MIT + file LICENSE
 URL: https://github.com/PSI-schools/AsthmaWorkshop
 BugReports: https://github.com/PSI-schools/AsthmaWorkshop/issues
+Depends: 
+    R (>= 2.10)
 Imports: 
     bslib,
     config (>= 0.3.2),
+    dplyr,
+    ggplot2,
     golem (>= 0.4.1),
     googledrive,
     googlesheets4,
     htmltools,
     reactable,
+    reshape2,
     shiny (>= 1.8.1.1),
-    shinyWidgets
+    shinyWidgets,
+    uuid
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
