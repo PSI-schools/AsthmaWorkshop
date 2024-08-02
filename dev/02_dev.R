@@ -21,7 +21,7 @@ attachment::att_amend_desc()
 ## Add modules ----
 ## Create a module infrastructure in R/
 golem::add_module(name = "landing_page", with_test = TRUE) 
-golem::add_module(name = "data_entry", with_test = TRUE) 
+golem::add_module(name = "stroop_test", with_test = TRUE) 
 golem::add_module(name = "view_data", with_test = TRUE) 
 golem::add_module(name = "admin", with_test = TRUE) 
 golem::add_module(name = "further_details", with_test = TRUE) 
