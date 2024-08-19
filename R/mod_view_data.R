@@ -17,21 +17,15 @@ mod_view_data_ui <- function(id) {
       position = "left",
       open = TRUE,
       radioGroupButtons(
-        inputId = ns("data_source"),
-        label = "What do you want displayed?",
-        choices = c("Group Data",
-                    "Class Data"),
-        status = "primary"
-      ),
-      radioGroupButtons(
         inputId = ns("plot_type"),
         label = with_red_star("Plot"),
         choices = c(
           "Histogram" = "Histogram",
           "Boxplot" = "BoxPlot",
           "CDF Plot" = "CDFPlot",
-          "Scatter Plot" = "ScatterPlot",
-          "CI Plot" = "CIPlot"
+          "Scatter Plot" = "ScatterPlot"
+          # ,
+          # "CI Plot" = "CIPlot"
         ),
         selected = "Histogram",
         direction = "vertical"
@@ -60,24 +54,15 @@ mod_view_data_ui <- function(id) {
 #' view_data Server Functions
 #'
 #' @noRd
-mod_view_data_server <- function(id, class_data, data, user_choices) {
+mod_view_data_server <- function(id, class_data, user_choices) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
-    PlotData <- reactive({
-      if (input$data_source == "Class Data") {
-        data <- class_data()
-      } else {
-        data <- data$GroupData
-      }
-      return(data)
-    })
     
     
     output$plot <- renderPlot({
       validate(
         need(
-          nrow(PlotData()) > 4 && length(unique(PlotData()$Treatment)) > 1,
+          nrow(class_data()) > 4 && length(unique(class_data()$Group)) > 1,
           "To visualise these data, there must be multiple unique datapoints!"
         )
       )
@@ -86,31 +71,60 @@ mod_view_data_server <- function(id, class_data, data, user_choices) {
       switch(
         input$plot_type,
         "Histogram" = {
-          plot <- ggplot(data = PlotData(),
+          plot <- ggplot(data = class_data(),
                          aes(
                            x = Value,
                            y = after_stat(density),
-                           fill = Treatment
+                           fill = Group
                          )) +
             geom_histogram(color = MyPallette$black,
                            alpha = 0.7) +
             labs(x = user_choices$ValueLabel,
                  y = "Frequency Density") +
             scale_fill_manual(
-              "Treatment",
-              labels = c("Placebo", "Drug"),
+              "Group",
+              labels = c("Group A", "Group B"),
               values = c(MyPallette$col_pla, MyPallette$col_drug)
             ) +
             scale_color_manual(
-              "Treatment",
-              labels = c("Placebo", "Drug"),
+              "Group",
+              labels = c("Group A", "Group B"),
               values = c(MyPallette$col_pla, MyPallette$col_drug)
             ) +
-            facet_grid(rows = vars(Treatment))
+            facet_grid(rows = vars(Group)) +
+            theme(
+              panel.background = element_rect(fill = MyPallette$grey),
+              panel.grid = element_line(),
+              axis.line.x = element_line(
+                colour = MyPallette$black,
+                linewidth = 0.25,
+                linetype = 1
+              ),
+              axis.text.x = element_text(colour = MyPallette$black,
+                                         size = 20),
+              axis.title.x = element_text(colour = MyPallette$black,
+                                          size = 20),
+              axis.line.y = element_blank(),
+              axis.text.y = element_blank(),
+              axis.ticks.y = element_blank(),
+              strip.text = element_text(
+                angle = 0,
+                size = 16,
+                color = MyPallette$black
+              ),
+              strip.background = element_rect(
+                color = MyPallette$black,
+                fill = "white",
+                size = 1,
+                linetype = "solid"
+              ),
+              panel.spacing.y = unit(2, "lines"),
+              legend.position = "none"
+            )
           
           if (isTRUE(input$labels)) {
-            mean <- mean(PlotData()$Value)
-            median <- median(PlotData()$Value)
+            mean <- mean(class_data()$Value)
+            median <- median(class_data()$Value)
             
             plot <- plot +
               geom_vline(
@@ -130,7 +144,7 @@ mod_view_data_server <- function(id, class_data, data, user_choices) {
           if (isTRUE(input$density)) {
             plot <-
               plot + stat_density(geom = "line",
-                                  aes(color = factor(Treatment)),
+                                  aes(color = factor(Group)),
                                   size =
                                     1)
           }
@@ -140,35 +154,64 @@ mod_view_data_server <- function(id, class_data, data, user_choices) {
         },
         "BoxPlot" = {
           plot <-
-            ggplot(data = PlotData(), aes(x = Value, fill = factor(Treatment))) +
+            ggplot(data = class_data(), aes(x = Value, fill = factor(Group))) +
             geom_boxplot(width = 1,
                          color = MyPallette$black,
                          alpha = 0.7) +
             labs(x = user_choices$ValueLabel) +
             scale_fill_manual(
-              "Treatment",
-              labels = c("Placebo", "Drug"),
+              "Group",
+              labels = c("Group A", "Group B"),
               values = c(MyPallette$col_pla, MyPallette$col_drug)
             ) +
-            facet_grid(rows = vars(Treatment))
+            facet_grid(rows = vars(Group)) + 
+            theme(
+              panel.background = element_rect(fill = MyPallette$grey),
+              panel.grid = element_line(),
+              axis.line.x = element_line(
+                colour = MyPallette$black,
+                linewidth = 0.25,
+                linetype = 1
+              ),
+              axis.text.x = element_text(colour = MyPallette$black,
+                                         size = 20),
+              axis.title.x = element_text(colour = MyPallette$black,
+                                          size = 20),
+              axis.line.y = element_blank(),
+              axis.text.y = element_blank(),
+              axis.ticks.y = element_blank(),
+              strip.text = element_text(
+                angle = 0,
+                size = 16,
+                color = MyPallette$black
+              ),
+              strip.background = element_rect(
+                color = MyPallette$black,
+                fill = "white",
+                size = 1,
+                linetype = "solid"
+              ),
+              panel.spacing.y = unit(2, "lines"),
+              legend.position = "none"
+            ) 
           print(plot)
         },
         "CDFPlot" = {
           plot <-
-            ggplot(data = PlotData(), aes(x = Value, fill = factor(Treatment))) +
-            stat_ecdf(aes(color = Treatment), size = 1.5) +
+            ggplot(data = class_data(), aes(x = Value, fill = factor(Group))) +
+            stat_ecdf(aes(color = Group), size = 1.5) +
             geom_segment(
               y = 0.5,
               yend = 0.5,
-              x = min(PlotData()$Value * 0.9),
-              xend = max(PlotData()$Value * 1.1),
+              x = min(class_data()$Value * 0.9),
+              xend = max(class_data()$Value * 1.1),
               color = MyPallette$black,
               linetype = "dashed",
               size = 0.50
             ) +
             # geom_segment(x=median(data_p$pef), xend=median(data_p$pef), y=-0.5, yend=1, color=col_pla, linetype="dashed", size=0.75) +
             # geom_segment(x=median(data_d$pef), xend=median(data_d$pef), y=-0.5, yend=1, color=col_drug, linetype="dashed", size=0.75) +
-            scale_color_manual("Treatment",
+            scale_color_manual("Group",
                                values = c(MyPallette$col_pla, MyPallette$col_drug)) +
             labs(x = user_choices$ValueLabel)
           scale_y_continuous("Proportion",
@@ -178,7 +221,7 @@ mod_view_data_server <- function(id, class_data, data, user_choices) {
         },
         "ScatterPlot" = {
           plot <-
-            ggplot(data = PlotData(), aes(x = Value, Height, fill = Treatment)) +
+            ggplot(data = class_data(), aes(x = Value, Height, fill = Group)) +
             geom_point(
               shape = 21,
               color = MyPallette$black,
@@ -188,9 +231,26 @@ mod_view_data_server <- function(id, class_data, data, user_choices) {
             labs(x = user_choices$ValueLabel,
                  y = "Height (cm)") +
             scale_fill_manual(
-              "Treatment",
-              labels = c("Placebo", "Drug"),
+              "Group",
+              labels = c("Group A", "Group B"),
               values = c(MyPallette$col_pla, MyPallette$col_drug)
+            ) + 
+            theme(
+              panel.background = element_rect(fill = MyPallette$grey),
+              panel.grid = element_line(),
+              axis.line = element_line(
+                colour = MyPallette$black,
+                linewidth = 0.25,
+                linetype = 1
+              ),
+              axis.text = element_text(colour = MyPallette$black,
+                                       size = 20),
+              axis.title = element_text(colour = MyPallette$black,
+                                        size = 20),
+              legend.text = element_text(colour = MyPallette$black,
+                                         size = 14),
+              legend.title = element_text(colour = MyPallette$black,
+                                          size = 14)
             )
           
           if (isTRUE(input$labels)) {
@@ -206,14 +266,14 @@ mod_view_data_server <- function(id, class_data, data, user_choices) {
           # Data Wrangling
           #' @import dplyr
           #' @import tidyr
-          summary_stats <- PlotData() %>%
-            group_by(Group, Treatment) %>%
+          summary_stats <- class_data() %>%
+            group_by(Group, Group) %>%
             summarise(
               mean_value = mean(Value),
               sd_value = sd(Value),
               n = n()
             ) %>%
-            pivot_wider(names_from = Treatment,
+            pivot_wider(names_from = Group,
                         values_from = c(mean_value, sd_value, n)) %>%
             mutate(
               diff_mean = sd_value_Condition - mean_value_Placebo,
@@ -242,7 +302,7 @@ mod_view_data_server <- function(id, class_data, data, user_choices) {
             geom_vline(aes(xintercept = 0),
                        color = MyPallette$black,
                        size = 1) +
-            labs(x = "Effect of Treatment (Drug - Control)",
+            labs(x = "Effect of Group (Drug - Control)",
                  y = "Group") +
             scale_color_manual(values = c("0" = MyPallette$red, "1" = MyPallette$green)) +
             scale_fill_manual(values = c("0" = MyPallette$red, "1" = MyPallette$green)) +
