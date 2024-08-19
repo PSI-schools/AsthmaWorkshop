@@ -22,8 +22,7 @@ mod_view_data_ui <- function(id) {
         choices = c(
           "Histogram" = "Histogram",
           "Boxplot" = "BoxPlot",
-          "CDF Plot" = "CDFPlot",
-          "Scatter Plot" = "ScatterPlot"
+          "CDF Plot" = "CDFPlot"
           # ,
           # "CI Plot" = "CIPlot"
         ),
@@ -255,7 +254,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
           
           if (isTRUE(input$labels)) {
             plot <-
-              plot + geom_text(aes(labels = Name),
+              plot + geom_text(aes(labels = Initials),
                                size = 6,
                                nudge_y = 0.1)
           }

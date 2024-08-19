@@ -38,6 +38,7 @@ mod_results_table_server <-
         reactable(data = class_data(),
                   columns = list(
                     ID = colDef(show = FALSE),
+                    Height = colDef(show = FALSE), #TEMP HIDE HEIGHT UNTIL DECISION MADE
                     Value = colDef(name = user_choices$ValueLabel, 
                                    format = colFormat(digits = 2))
                   ))

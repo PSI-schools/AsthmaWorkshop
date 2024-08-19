@@ -6,7 +6,7 @@
 psi_theme <- bs_theme(
   version = 5,
   bg = "#FFFFFF",
-  fg = "#00638e",
+  fg = "#000",
   primary = "#00638e",
   secondary = "#45C2D2",
   success = "#66b4eb",

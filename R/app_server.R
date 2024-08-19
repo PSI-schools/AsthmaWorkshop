@@ -10,28 +10,7 @@ app_server <- function(input, output, session) {
   
   library(ggplot2)
   
-  theme_set(
-    theme(
-      panel.background = element_rect(fill = MyPallette$grey),
-      panel.grid = element_line(),
-      axis.line = element_line(
-        colour = MyPallette$black,
-        linewidth = 0.25,
-        linetype = 1
-      ),
-      axis.text = element_text(colour = MyPallette$black,
-                               size = 20),
-      axis.title = element_text(colour = MyPallette$black,
-                                size = 20),
-      legend.text = element_text(colour = MyPallette$black,
-                                 size = 14),
-      legend.title = element_text(colour = MyPallette$black,
-                                  size = 14)
-    )
-  )
-  
-  
-  
+
   gs4_deauth()
   drive_deauth()
   drive_auth(cache = ".secrets", email = "psischoolsinitiative@gmail.com")
@@ -42,8 +21,8 @@ app_server <- function(input, output, session) {
   
   userChoices <-
     reactiveValues(
-      ValueLabel = "Peak Expiratory Flow",
-      Group = c("Group A", "Group B", "Group C"),
+      ValueLabel = "Time (s)",
+      Group = c("Group A", "Group B"),
       Treatment = c("Control", "Placebo")
     )
   
@@ -69,41 +48,27 @@ app_server <- function(input, output, session) {
         if (is.null(id)) {
           return(data.frame(
             ID = character(0L),
-            Person = character(0L),
+            Initials = character(0L),
             Group = character(0L),
-            Treatment = character(0L),
             Height = numeric(0L),
             Sex = factor(levels = c("Male", "Female")),
             Value = numeric(0L)
           ))
         }
-
         # Read the data
         read_sheet(ss = id)
       }
   )
   
-  data <-
-    reactiveValues(
-      GroupData = data.frame(
-        ID = character(0L),
-        Person = character(0L),
-        Group = character(0L),
-        Treatment = character(0L),
-        Height = numeric(0L),
-        Sex = factor(levels = c("Male", "Female")),
-        Value = numeric(0L)
-      ))
-  
-  mod_data_entry_server(
-    "data_entry",
-    data = data,
+  mod_stroop_test_server(
+    "stroop_test",
     class_data = classData,
-    application_state = applicationState,
-    user_choices = userChoices
+    application_state = applicationState
   )
+  mod_results_table_server("results_table", 
+                           class_data = classData, 
+                           user_choices = userChoices)
   mod_view_data_server("view_data", 
-                       data = data,
                        class_data = classData, 
                        user_choices = userChoices)
   mod_admin_server("admin",
