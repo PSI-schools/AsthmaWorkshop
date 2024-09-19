@@ -25,19 +25,24 @@ mod_stroop_test_ui <- function(id) {
         status = "primary"
       ),
       mod_randomisation_ui(ns("randomisation")),
-      wellPanel(
-        h2("Stop Watch"),
-        actionButton(
-          inputId = ns("start"),
-          label = "Start",
-          style = "background-color: green; color: white;"
-        ),
-        actionButton(
-          inputId = ns("stop"),
-          label = "Stop",
-          style = "background-color: red; color: white;"
-        ),
-        textOutput(ns("timer"))
+      card(
+        card_header(class = "bg-primary d-flex justify-content-between align-items-center",
+                    h5("StopWatch"),
+                    div(
+                      actionButton(
+                        inputId = ns("start"),
+                        label = "Start",
+                        style = "background-color: green; color: white;"
+                      ),
+                      actionButton(
+                        inputId = ns("stop"),
+                        label = "Stop",
+                        style = "background-color: red; color: white;"
+                      )
+                    )),
+        card_body(
+          textOutput(ns("timer"))
+        )
       ),
       card(
         card_header(
@@ -46,20 +51,17 @@ mod_stroop_test_ui <- function(id) {
           actionBttn(inputId = ns("submit"), label = "Submit")
         ),
         card_body(
-          layout_column_wrap(
-            width = 1 / 2,
-            h3("Control Time"),
-            textOutput(ns("ControlTime")),
-            h3("Stroop Time"),
-            textOutput(ns("StroopTime"))
-          )
+          h5("Control Time"),
+          textOutput(ns("ControlTime")),
+          h5("Stroop Time"),
+          textOutput(ns("StroopTime"))
         )
       )
-    ),
-    card(
-      card_header(h2("Stroop Test"), class = "bg-primary"),
-      card_body(plotOutput(ns("stroop_plot"), width = "auto"))
     )
+  ),
+  card(
+    card_header(h2("Stroop Test"), class = "bg-primary"),
+    card_body(plotOutput(ns("stroop_plot"), width = "auto"))
   ))
 }
 
@@ -131,8 +133,8 @@ mod_stroop_test_server <-
         )
         
         if (any(c(
-          is.null(duration$StroopStatus),
-          is.null(duration$ControlStatus)
+          is.null(StopWatch$StroopDuration),
+          is.null(StopWatch$ControlDuration)
         ))) {
           group(firstTest())
           
@@ -225,14 +227,7 @@ mod_stroop_test_server <-
         } else {
           saveData(
             id = application_state$GoogleSheets,
-            data = data.frame(
-              ID = UUIDgenerate(),
-              Initials = input$initials,
-              Group = group(),
-              Height = "",
-              Sex = input$sex,
-              Value = as.numeric(duration(), units = "secs")
-            )
+            data = StopWatch$GetData()
           )
           sendSweetAlert(
             session = session,
