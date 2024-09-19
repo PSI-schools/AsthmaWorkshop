@@ -18,38 +18,48 @@ mod_stroop_test_ui <- function(id) {
     wellPanel(
       h2("Subject Details"),
       textInput(ns("initials"), label = "Your Initials"),
-      # numericInput(
-      #   inputId = ns("height"),
-      #   label = "Height (cm)",
-      #   value = NULL,
-      #   min = 0L,
-      #   max = 250
-      # ),
       radioGroupButtons(
         inputId = ns("sex"),
         label = "Sex",
         choices = c("Male", "Female"),
         status = "primary"
       ),
+      mod_randomisation_ui(ns("randomisation")),
       wellPanel(
-      h2("Stop Watch"),
-      actionButton(
-        inputId = ns("start"),
-        label = "Start",
-        style = "background-color: green; color: white;"
+        h2("Stop Watch"),
+        actionButton(
+          inputId = ns("start"),
+          label = "Start",
+          style = "background-color: green; color: white;"
+        ),
+        actionButton(
+          inputId = ns("stop"),
+          label = "Stop",
+          style = "background-color: red; color: white;"
+        ),
+        textOutput(ns("timer"))
       ),
-      actionButton(
-        inputId = ns("stop"),
-        label = "Stop",
-        style = "background-color: red; color: white;"
-      ),
-      h2("Time"),
-      textOutput(ns("duration"))
-    ))
-  ),
-  card(
-    card_header(h2("Stroop Test"), class = "bg-primary"),
-    card_body(plotOutput(ns("stroop_plot"), width = "auto"))
+      card(
+        card_header(
+          class = "bg-primary d-flex justify-content-between align-items-center",
+          h5("Your times"),
+          actionBttn(inputId = ns("submit"), label = "Submit")
+        ),
+        card_body(
+          layout_column_wrap(
+            width = 1 / 2,
+            h3("Control Time"),
+            textOutput(ns("ControlTime")),
+            h3("Stroop Time"),
+            textOutput(ns("StroopTime"))
+          )
+        )
+      )
+    ),
+    card(
+      card_header(h2("Stroop Test"), class = "bg-primary"),
+      card_body(plotOutput(ns("stroop_plot"), width = "auto"))
+    )
   ))
 }
 
@@ -66,14 +76,14 @@ mod_stroop_test_server <-
            application_state) {
     moduleServer(id, function(input, output, session) {
       ns <- session$ns
-      
+      StopWatch <- StopWatch$new()
       active <- reactiveVal(FALSE)
-      startTime <- reactiveVal(value = NULL)
       timer <- reactiveVal(0)
-      duration <- reactiveVal(0)
       group <- reactiveVal(NULL)
       
+      firstTest <- mod_randomisation_server("randomisation")
       
+      # For a effect of stopwatch
       observe({
         invalidateLater(1000, session)
         isolate({
@@ -84,15 +94,10 @@ mod_stroop_test_server <-
         })
       })
       
-      output$duration <- renderText(timer())
+      output$timer <- renderText(timer())
       
       stroopPlot <- eventReactive(input$start, {
         Sys.sleep(1.5)
-        
-        startTime(Sys.time())
-        active(TRUE)
-        
-        # Randomisation
         
         words <- c("RED", "BLUE", "GREEN", "PURPLE", "ORANGE")
         colors <-
@@ -125,12 +130,21 @@ mod_stroop_test_server <-
           y = rep(1:4, times = 4)
         )
         
-        rand <- runif(1)
-        group("A")
-        if (rand < 0.5) {
-          group("B")
+        if (any(c(
+          is.null(duration$StroopStatus),
+          is.null(duration$ControlStatus)
+        ))) {
+          group(firstTest())
+          
+        } else {
+          choices <- c("Control", "Stroop")
+          
+          group(choices[!(firstTest() %in% choices)])
           df = df1
         }
+        
+        StopWatch$Start(treatment = group())
+        active(TRUE)
         
         # Plot using ggplot2
         ggplot(df, aes(
@@ -154,7 +168,10 @@ mod_stroop_test_server <-
       })
       
       observeEvent(input$stop, {
-        duration(Sys.time() - startTime())
+        StopWatch$Stop(Treatment = group())
+        
+        currentDuration <-
+          StopWatch[paste0(group, "Duration")]
         
         # Reset State
         timer(0)
@@ -163,21 +180,31 @@ mod_stroop_test_server <-
         showModal(modalDialog(
           title = "Congratulations",
           tagList(
-            p(sprintf("You had a time of %.2f seconds", duration())),
+            h2(Timer[paste0(group, "Duration")]),
+            p(sprintf("seconds. For the %s group", group())),
             p(
               "Click \"Submit\" to enter your time and compare how you did against the rest of your class"
             )
           ),
           footer = tagList(
             actionButton(ns("cancel"), "Cancel", style = "background-color: red; color: white;"),
-            actionButton(ns("submit"), "Submit", style = "background-color: green; color: white;")
+            actionButton(ns("confirm"), "Confirm", style = "background-color: green; color: white;")
           )
         ))
       })
       
-      observeEvent(input$submit, {
+      observeEvent(input$confirm, {
         removeModal()
-        
+      })
+      
+      observeEvent(input$cancel, {
+        # Reset time for that group
+        StopWatch$Reset(treatment = group)
+        removeModal()
+      })
+      
+      
+      observeEvent(input$submit, {
         if (is.null(application_state$GoogleSheets)) {
           sendSweetAlert(
             session = session,
@@ -196,16 +223,17 @@ mod_stroop_test_server <-
             type = "warning"
           )
         } else {
-          saveData(id = application_state$GoogleSheets,
-                   data = data.frame(
-                     ID = UUIDgenerate(),
-                     Initials = input$initials,
-                     Group = group(),
-                     Height = "",
-                       # input$height,
-                     Sex = input$sex,
-                     Value = as.numeric(duration(), units = "secs")
-                   ))
+          saveData(
+            id = application_state$GoogleSheets,
+            data = data.frame(
+              ID = UUIDgenerate(),
+              Initials = input$initials,
+              Group = group(),
+              Height = "",
+              Sex = input$sex,
+              Value = as.numeric(duration(), units = "secs")
+            )
+          )
           sendSweetAlert(
             session = session,
             title = "Data Successfully Uploaded!",
@@ -213,9 +241,6 @@ mod_stroop_test_server <-
             type = "success"
           )
         }
-      })
-      observeEvent(input$cancel, {
-        removeModal()
       })
     })
   }

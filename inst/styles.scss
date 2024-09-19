@@ -1,0 +1,54 @@
+.profile-card {
+  background: #fff;
+    border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  width: 400px;
+  text-align: center;
+  transition: transform 0.3s;
+}
+
+.profile-card:hover {
+  transform: translateY(-10px);
+}
+
+.profile-card img {
+  width: 200px; /* Set the desired width */
+    height: 200px; /* Set the desired height */
+    border-radius: 50%; /* Make the image circular */
+    object-fit: cover; /* Ensure the image covers the element */
+    margin-top: 20px; /* Add some space at the top */
+}
+
+.profile-card .profile-content {
+  padding: 20px;
+}
+
+.profile-card .profile-content h2 {
+  margin: 0;
+  color: #333;
+    font-size: 36px;
+}
+
+.profile-card .profile-content p {
+  color: #777;
+    margin: 10px 0 20px;
+  font-size: 24px;
+}
+
+.profile-card .profile-content .social {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.profile-card .profile-content .social a {
+  color: #555;
+    text-decoration: none;
+  font-size: 24px;
+  transition: color 0.3s;
+}
+
+.profile-card .profile-content .social a:hover {
+  color: #000;
+}

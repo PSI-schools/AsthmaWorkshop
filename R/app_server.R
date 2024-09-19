@@ -9,8 +9,6 @@
 app_server <- function(input, output, session) {
   
   library(ggplot2)
-  
-
   gs4_deauth()
   drive_deauth()
   drive_auth(cache = ".secrets", email = "psischoolsinitiative@gmail.com")

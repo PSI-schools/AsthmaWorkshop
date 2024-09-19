@@ -27,7 +27,8 @@ mod_further_details_ui <- function(id) {
         ),
         p(
           "Explore the profiles below to see examples of how you can develop mathematical, statistical and scientific skills that will be invaluable for building your career."
-        )
+        ), 
+        userCard()
       )
     ),
     card(
