@@ -48,8 +48,8 @@ app_server <- function(input, output, session) {
             ID = character(0L),
             Initials = character(0L),
             Group = character(0L),
-            Height = numeric(0L),
-            Sex = factor(levels = c("Male", "Female")),
+            Order = numeric(0L),
+            Test = character(0L),
             Value = numeric(0L)
           ))
         }

@@ -26,6 +26,7 @@ golem::add_module(name = "view_data", with_test = TRUE)
 golem::add_module(name = "admin", with_test = TRUE) 
 golem::add_module(name = "further_details", with_test = TRUE) 
 golem::add_module(name = "randomisation", with_test = TRUE) 
+golem::add_module(name = "score_cards", with_test = TRUE) 
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
@@ -33,6 +34,7 @@ golem::add_utils("saveData")
 golem::add_utils("loadData")
 golem::add_utils("checkFunction")
 golem::add_fct("randomisationOrder")
+golem::add_fct("summariseDataset")
 
 
 ## External resources

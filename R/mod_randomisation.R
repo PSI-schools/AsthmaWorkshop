@@ -28,23 +28,20 @@ mod_randomisation_ui <- function(id) {
   tagList(
     tags$style(HTML("
     .modal-dialog {
-      margin-top: 50px !important;  /* Adjust the margin-top to move the modal up */
+      margin-top: 25px !important;  /* Adjust the margin-top to move the modal up */
     }
   ")),
     tags$head(tags$script(HTML(jsCode))),
-    actionBttn(
+    actionButton(
       inputId = ns("randomisation"),
       label = "Randomisation",
-      size = "s",
-      style = "simple",
-      color = "primary",
-      icon = icon(name = "circle-info")
+      icon = icon(name = "shuffle"),
+      style = "background-color: green; color: white;"
     )
   )
 }
 
 #' randomisation Server Functions
-#' @importFrom waffle waffle
 #' @noRd
 
 mod_randomisation_server <- function(id, dataset = NULL) {
@@ -61,7 +58,6 @@ mod_randomisation_server <- function(id, dataset = NULL) {
                            "Randomisation"),
           size = "l",
           easyClose = TRUE,
-          footer = NULL,
           tagList(
             tags$div(
               style = "display: flex; justify-content: center; align-items: center; flex-direction: row;",
@@ -73,7 +69,7 @@ mod_randomisation_server <- function(id, dataset = NULL) {
                   id = "roulette",
                   tags$div(id = "left-half", "A"),
                   tags$div(id = "right-half", "B"),
-                  style = "width: 200px; height: 200px; border-radius: 50%; border: 2px solid black; position: relative;"
+                  style = "width: 180px; height: 180px; border-radius: 50%; border: 2px solid black; position: relative;"
                 ),
                 # Add the keyframes animation for spinning
                 tags$style(
@@ -83,7 +79,7 @@ mod_randomisation_server <- function(id, dataset = NULL) {
             to {transform: rotate(1480deg);}
           }
           #roulette.spin {
-            animation: spin 3.5s ease-in-out;
+            animation: spin 3.5s ease-in;
           }
           #left-half {
             width: 50%;
@@ -95,8 +91,8 @@ mod_randomisation_server <- function(id, dataset = NULL) {
             display: flex;
             justify-content: center;
             align-items: center;
-            border-top-left-radius: 100px;
-            border-bottom-left-radius: 100px;
+            border-top-left-radius: 90px;
+            border-bottom-left-radius: 90px;
             font-size: 20px;
             color: white;
             font-weight: bold;
@@ -111,8 +107,8 @@ mod_randomisation_server <- function(id, dataset = NULL) {
             display: flex;
             justify-content: center;
             align-items: center;
-            border-top-right-radius: 100px;
-            border-bottom-right-radius: 100px;
+            border-top-right-radius: 90px;
+            border-bottom-right-radius: 90px;
             font-size: 20px;
             color: white;
             font-weight: bold;
@@ -129,23 +125,24 @@ mod_randomisation_server <- function(id, dataset = NULL) {
       box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
       text-align: center;
       max-width: 500px;
-      margin: 20px auto;
+      margin: 10px auto;
     ",
                 # Add the "i" icon using Font Awesome
-                tags$i(class = "fa fa-info-circle", style = "font-size: 24px;"),
+                tags$i(class = "fa fa-info-circle", style = "font-size: 18px;"),
                 p(
                   "Randomisation is the process of randomly assigning patients to a
-              treatment or in this case the order which tests are carried out."
+              treatment or control. In this example the randomisation assignes the order 
+                  in which you will carry out the control then treatment."
                 ),
                 p(
-                  "The outcome is also 'blinded' this means you're not told which test
-              comes first. Can you think of the reasons why to blind an experiment?"
-                )
+                  "The outcome is 'blinded' which means you're not told which test
+              comes first." 
+                ), 
+                strong("Can you think of the reasons why to blind an experiment?")
               )
             ),
-            br(),
-            h3("Your Outcome"),
-            textOutput(ns("order")),
+            h3("Class Randomisation"),
+            # textOutput(ns("order")),
             div(style = "text-align: center;",
                 plotOutput(
                   ns("randomisationOrder"),
@@ -156,7 +153,6 @@ mod_randomisation_server <- function(id, dataset = NULL) {
         )
       )
       
-      
       # Trigger JavaScript to start the spinning animation
       session$sendCustomMessage(type = "spinWheel", message = list())
       
@@ -164,26 +160,20 @@ mod_randomisation_server <- function(id, dataset = NULL) {
       # invalidateLater(2000, session)  # Wait 2 seconds for the spin to finish
       
       isolate({
-        # Randomly choose between A and B
-        options <- c(A = "Stroop", B =  "Non-Stroop")
-        
-        first(sample(options, 1L))
+        first(sample(choices, 1L))
         
         output$order <- renderText({
           sprintf(
             "First you will be treatment %s then treatment %s",
             names(first()),
-            names(options[options != first()])
+            names(choices[choices != first()])
           )
         })
         
         output$randomisationOrder <- renderPlot({
           # invalidateLater(4000, session)
-          # Data for the waffle chart
-          data <- data.frame(values = 1:20,
-                             order = sample(options, 20L, replace = TRUE))
-          
-          randomisationOrder(data = data)
+          req(dataset())
+          randomisationOrder(data = dataset())
           
         })
       })

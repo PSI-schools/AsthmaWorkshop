@@ -21,29 +21,30 @@ mod_view_data_ui <- function(id) {
         label = with_red_star("Plot"),
         choices = c(
           "Histogram" = "Histogram",
-          "Boxplot" = "BoxPlot",
-          "CDF Plot" = "CDFPlot"
+          "Boxplot" = "BoxPlot"
+          # "CDF Plot" = "CDFPlot"
           # ,
           # "CI Plot" = "CIPlot"
         ),
         selected = "Histogram",
         direction = "vertical"
-      ),
-      wellPanel(
-        h2("Customise Plot"),
-        awesomeCheckbox(
-          inputId = ns("labels"),
-          label = "Show Labels",
-          value = FALSE,
-          status = "primary"
-        ),
-        awesomeCheckbox(
-          inputId = ns("density"),
-          label = "Display Density Curve",
-          value = FALSE,
-          status = "primary"
-        )
       )
+      # ,
+      # wellPanel(
+      #   h2("Customise Plot"),
+      #   awesomeCheckbox(
+      #     inputId = ns("labels"),
+      #     label = "Show Labels",
+      #     value = FALSE,
+      #     status = "primary"
+      #   ),
+      #   awesomeCheckbox(
+      #     inputId = ns("density"),
+      #     label = "Display Density Curve",
+      #     value = FALSE,
+      #     status = "primary"
+      #   )
+      # )
     ),
     card_body(plotOutput(ns("plot")))
   ),
@@ -61,7 +62,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
     output$plot <- renderPlot({
       validate(
         need(
-          nrow(class_data()) > 4 && length(unique(class_data()$Group)) > 1,
+          nrow(class_data()) > 4 && length(unique(class_data()$Test)) > 1,
           "To visualise these data, there must be multiple unique datapoints!"
         )
       )
@@ -74,20 +75,20 @@ mod_view_data_server <- function(id, class_data, user_choices) {
                          aes(
                            x = Value,
                            y = after_stat(density),
-                           fill = Group
+                           fill = Test
                          )) +
             geom_histogram(color = MyPallette$black,
                            alpha = 0.7) +
             labs(x = user_choices$ValueLabel,
                  y = "Frequency Density") +
             scale_fill_manual(
-              "Group",
-              labels = c("Group A", "Group B"),
+              "Test",
+              labels = c("Control", "Stroop"),
               values = c(MyPallette$col_pla, MyPallette$col_drug)
             ) +
             scale_color_manual(
-              "Group",
-              labels = c("Group A", "Group B"),
+              "Test",
+              labels = c("Control", "Stroop"),
               values = c(MyPallette$col_pla, MyPallette$col_drug)
             ) +
             facet_grid(rows = vars(Group)) +
@@ -153,14 +154,14 @@ mod_view_data_server <- function(id, class_data, user_choices) {
         },
         "BoxPlot" = {
           plot <-
-            ggplot(data = class_data(), aes(x = Value, fill = factor(Group))) +
+            ggplot(data = class_data(), aes(x = Value, fill = factor(Test))) +
             geom_boxplot(width = 1,
                          color = MyPallette$black,
                          alpha = 0.7) +
             labs(x = user_choices$ValueLabel) +
             scale_fill_manual(
-              "Group",
-              labels = c("Group A", "Group B"),
+              "Test",
+              labels = c("Control", "Stroop"),
               values = c(MyPallette$col_pla, MyPallette$col_drug)
             ) +
             facet_grid(rows = vars(Group)) + 

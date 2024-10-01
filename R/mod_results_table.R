@@ -8,7 +8,7 @@
 #'
 #' @importFrom shiny NS tagList
 #' @importFrom 'shinyWidgets' 'actionBttn'
-#' @importFrom 'reactable' 'reactableOutput' 'colDef' 'colFormat'
+#' @importFrom 'reactable' 'reactableOutput' 'colDef' 'colFormat' 'reactableTheme'
 
 
 mod_results_table_ui <- function(id) {
@@ -18,7 +18,9 @@ mod_results_table_ui <- function(id) {
     class = "bg-primary"
   ),
   card_body(
-    card(reactableOutput(ns("results_table")),
+    card(
+      mod_score_cards_ui(ns("score_card")),
+      reactableOutput(ns("results_table")),
          full_screen = TRUE)
   )))
 }
@@ -35,13 +37,39 @@ mod_results_table_server <-
       
       output$results_table <- renderReactable({
         validate(need(nrow(class_data()) > 0, "Please enter some values"))
-        reactable(data = class_data(),
+        
+        # Datawrangliing of data for table 
+        data <- class_data() |>
+          pivot_wider(names_from = Test, 
+                      values_from = Value)
+        
+        reactable(data = data,
                   columns = list(
                     ID = colDef(show = FALSE),
-                    Height = colDef(show = FALSE), #TEMP HIDE HEIGHT UNTIL DECISION MADE
-                    Value = colDef(name = user_choices$ValueLabel, 
+                    Date = colDef(show = FALSE),
+                    Control = colDef(name = "Control Time", 
+                                    format = colFormat(digits = 2)),
+                    Stroop = colDef(name = "Stroop Time", 
                                    format = colFormat(digits = 2))
+                  ),
+                  # Global table options
+                  pagination = TRUE,
+                  highlight = TRUE,
+                  bordered = TRUE,
+                  striped = TRUE,
+                  defaultPageSize = 10,
+                  searchable = TRUE,
+                  theme = reactableTheme(
+                    borderColor = "#D3D3D3",
+                    stripedColor = "#F9F9F9",
+                    highlightColor = "#D8EBF9",
+                    cellPadding = "8px",
+                    style = list(fontFamily = "Arial", fontSize = "14px"),
+                    searchInputStyle = list(width = "100%")
                   ))
       })
+      
+      mod_score_cards_server("score_card", dataset = class_data)
+      
     })
   }

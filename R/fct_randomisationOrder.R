@@ -14,13 +14,16 @@ randomisationOrder <-
            values_per_row = 20,
            size = 14,
            filter = 20) {
+    
+    # Return the first test
+    data <-  data[data$Order == 1, ] 
     data$x <-
       1:nrow(data) - (floor(1:nrow(data) / (values_per_row + 1)) * values_per_row)
     data$y <-
       1 - (floor(1:nrow(data) / values_per_row) * (size  / 150))
     rows <-  ceiling(nrow(data) / values_per_row)
     
-    data$colour <- ifelse(data$order == "Non-Stroop", colours$control, colours$stroop)
+    data$colour <- ifelse(data$Test == "Control", colours$control, colours$stroop)
     
     data <-
       data[1:min(nrow(data), filter), 1:ncol(data), drop = FALSE]
@@ -33,6 +36,8 @@ randomisationOrder <-
         size = size,
         color = data$colour
       ) +
+      scale_x_continuous(breaks = 1:nrow(data), labels = data$Initials, 
+                         position = "top") +
       labs(
         caption = sprintf("The randomisation outcome for the previous %s people", 
                           min(nrow(data), filter))
@@ -41,7 +46,8 @@ randomisationOrder <-
           theme(
             panel.grid = element_blank(),
             axis.title = element_blank(),
-            axis.text = element_blank(),
+            axis.text.y = element_blank(),
+            axis.text.x = element_text(vjust = 0),
             plot.caption = element_text(hjust = 0, size = 14)
           )
         
@@ -50,7 +56,8 @@ randomisationOrder <-
           coords <- coord_cartesian(ylim = c(1 - size / 400, 1 + size / 400))
         } else {
           coords <-
-            coord_cartesian(ylim = c(1 - rows * (size / 250), 1 + size / 400))
+            coord_cartesian(ylim = c(1, 1))
+                                       # rows * (size / 250), 1))
         }
         plot + coords
         

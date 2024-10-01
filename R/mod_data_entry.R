@@ -6,69 +6,125 @@
 #'
 #' @noRd
 #'
-#' @importFrom bslib page_sidebar sidebar navset_card_tab nav_panel
+#' @importFrom bslib page_sidebar sidebar navset_card_tab nav_panel layout_columns
 #' @importFrom reactable reactableOutput reactable renderReactable
 #' @importFrom shinyWidgets radioGroupButtons sendSweetAlert
 
 mod_stroop_test_ui <- function(id) {
   ns <- NS(id)
-  page_sidebar(sidebar = sidebar(
-    width = "30%",
-    open = "always",
-    wellPanel(
-      h2("Subject Details"),
-      textInput(ns("initials"), label = "Your Initials"),
-      radioGroupButtons(
-        inputId = ns("sex"),
-        label = "Sex",
-        choices = c("Male", "Female"),
-        status = "primary"
-      ),
-      mod_randomisation_ui(ns("randomisation")),
+  page_sidebar(
+    tags$style(
+      HTML(
+        "
+    .stopwatch-timer {
+      font-size: 24px;           /* Large font for timer */
+      font-family: 'Courier New', Courier, monospace;  /* Monospace font */
+      border: 2px solid black;   /* Border to give a stopwatch-like look */
+      border-radius: 10px;       /* Rounded corners */
+      padding: 5px;             /* Padding for spacing */
+      width: 150px;              /* Fixed width for consistency */
+      text-align: center;        /* Center the text inside */
+      background-color: #f0f0f0; /* Light background color */
+      margin: 10px auto;         /* Center horizontally on the page */
+    }
+  "
+      )
+    ),
+    sidebar = sidebar(
+      width = "30%",
+      open = "always",
       card(
-        card_header(class = "bg-primary d-flex justify-content-between align-items-center",
-                    h5("StopWatch"),
-                    div(
-                      actionButton(
-                        inputId = ns("start"),
-                        label = "Start",
-                        style = "background-color: green; color: white;"
-                      ),
-                      actionButton(
-                        inputId = ns("stop"),
-                        label = "Stop",
-                        style = "background-color: red; color: white;"
-                      )
-                    )),
+        card_header(
+          class = "bg-primary d-flex justify-content-between align-items-center",
+          strong("Subject Details"),
+          mod_randomisation_ui(ns("randomisation"))
+        ),
         card_body(
-          textOutput(ns("timer"))
+          layout_columns(
+            textInput(ns("initials"), label = "Your Initials", value = ""),
+            layout_columns(div(
+              class = "mb-3",
+              p("Current Experiment"),
+              textOutput(ns("current_experiment"))
+            ))
+          )
+          ,
+          radioGroupButtons(
+            inputId = ns("group"),
+            label = "Class Group",
+            choices = c("A",
+                        "B", "C", "D"),
+            status = "primary"
+          )
         )
       ),
       card(
         card_header(
           class = "bg-primary d-flex justify-content-between align-items-center",
-          h5("Your times"),
-          actionBttn(inputId = ns("submit"), label = "Submit")
+          strong("StopWatch"),
+          div(
+            actionButton(
+              inputId = ns("start"),
+              label = "Start",
+              icon = icon("play"),
+              style = "background-color: green; color: white;",
+              disabled = TRUE
+            ),
+            actionButton(
+              inputId = ns("stop"),
+              label = "Stop",
+              icon = icon("stop"),
+              style = "background-color: red; color: white;",
+              disabled = TRUE
+            )
+          )
         ),
-        card_body(
-          h5("Control Time"),
-          textOutput(ns("ControlTime")),
-          h5("Stroop Time"),
-          textOutput(ns("StroopTime"))
-        )
+        card_body(div(
+          id = "stopwatch-container",
+          div(textOutput(ns("timer")), class = "stopwatch-timer")  # Wrap with div for styling
+        ))
+      ),
+      card(
+        card_header(
+          class = "bg-primary d-flex justify-content-between align-items-center",
+          strong("Your times"),
+          actionButton(
+            inputId = ns("submit"),
+            label = "Submit",
+            icon = icon("cloud-arrow-up"),
+            disabled = TRUE,
+            style = "background-color: green; color: white;",
+          )
+        ),
+        card_body(layout_columns(
+          div(
+            class = "mb-1",
+            strong("Result 1"),
+            div(class = "stopwatch-timer",
+                textOutput(ns("time1")))
+          ),
+          div(
+            class = "mb-1",
+            strong("Result 2"),
+            div(class = "stopwatch-timer",
+                textOutput(ns("time2")))
+          )
+        ))
       )
+    ),
+    card(
+      card_header(h2("Experiment"), class = "bg-primary"),
+      card_body(plotOutput(ns("stroop_plot"), width = "auto"))
     )
-  ),
-  card(
-    card_header(h2("Stroop Test"), class = "bg-primary"),
-    card_body(plotOutput(ns("stroop_plot"), width = "auto"))
-  ))
+  )
 }
 
 #' stroop_test Server Functions
 #' @importFrom shinyWidgets updateRadioGroupButtons
 #' @importFrom uuid UUIDgenerate
 #' @importFrom reactable reactable colDef
+#' @importFrom bslib value_box
+#' @importFrom bsicons bs_icon
 #' @noRd
 
 
@@ -78,14 +134,29 @@ mod_stroop_test_server <-
            application_state) {
     moduleServer(id, function(input, output, session) {
       ns <- session$ns
-      StopWatch <- StopWatch$new()
+      
       active <- reactiveVal(FALSE)
       timer <- reactiveVal(0)
       group <- reactiveVal(NULL)
+      experiment <- reactiveVal(NULL)
       
-      firstTest <- mod_randomisation_server("randomisation")
+      StopWatch <- StopWatch$new()
       
-      # For a effect of stopwatch
+      firstTest <-
+        mod_randomisation_server("randomisation", dataset = class_data)
+      
+      output$current_experiment <- renderText({
+        experiment()
+      })
+      
+      
+      observe({
+        req(isTruthy(firstTest()))
+        updateActionButton(inputId = "start", disabled = FALSE)
+        experiment("1")
+      })
+      
+      # For a effect of stopwatch timer counting up
       observe({
         invalidateLater(1000, session)
         isolate({
@@ -96,73 +167,77 @@ mod_stroop_test_server <-
         })
       })
       
-      output$timer <- renderText(timer())
+      output$timer <-
+        renderText(sprintf("%02d:%02d", timer() %/% 60, timer() %% 60))
       
       stroopPlot <- eventReactive(input$start, {
-        Sys.sleep(1.5)
+        updateActionButton(inputId = "start", disabled = TRUE)
+        updateActionButton(inputId = "stop", disabled = FALSE)
         
-        words <- c("RED", "BLUE", "GREEN", "PURPLE", "ORANGE")
-        colors <-
-          c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00")
-        my_dgrey <- "#f0f0f0"
-        
-        my_theme <- theme(
-          text = element_text(size = 30),
-          plot.title = element_text(size = 25),
-          panel.background = element_rect(fill = my_dgrey),
-          panel.border = element_rect(fill = NA),
-          panel.grid = element_blank(),
-          axis.line = element_blank(),
-          axis.text = element_blank(),
-          axis.title = element_blank()
-        )
-        
-        df <- data.frame(
-          word = sample(words, 16, replace = TRUE),
-          color = sample(colors, 16, replace = TRUE),
-          x = rep(1:4, each = 4),
-          y = rep(1:4, times = 4)
-        )
-        
-        df1 <- data.frame(
-          (i = sample(1:5, 16, replace = TRUE)),
-          word = words[i],
-          color = colors[i],
-          x = rep(1:4, each = 4),
-          y = rep(1:4, times = 4)
-        )
-        
-        if (any(c(
-          is.null(StopWatch$StroopDuration),
-          is.null(StopWatch$ControlDuration)
-        ))) {
-          group(firstTest())
-          
+        if (is.null(firstTest())) {
+          sendSweetAlert(title = "Action Required",
+                         type = "info",
+                         text = "Click the randomisation button first")
         } else {
-          choices <- c("Control", "Stroop")
+          words <- c("RED", "BLUE", "GREEN", "PURPLE", "ORANGE")
+          colors <-
+            c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00")
+          my_dgrey <- "#f0f0f0"
           
-          group(choices[!(firstTest() %in% choices)])
-          df = df1
+          my_theme <- theme(
+            text = element_text(size = 24),
+            plot.title = element_text(size = 25),
+            panel.background = element_rect(fill = my_dgrey),
+            panel.border = element_rect(fill = NA),
+            panel.grid = element_blank(),
+            axis.line = element_blank(),
+            axis.text = element_blank(),
+            axis.title = element_blank()
+          )
+          
+          df <- data.frame(
+            word = sample(words, 16, replace = TRUE),
+            color = sample(colors, 16, replace = TRUE),
+            x = rep(1:4, each = 4),
+            y = rep(1:4, times = 4)
+          )
+          
+          df1 <- data.frame(
+            (i = sample(1:5, 16, replace = TRUE)),
+            word = words[i],
+            color = colors[i],
+            x = rep(1:4, each = 4),
+            y = rep(1:4, times = 4)
+          )
+          
+          if (all(c(
+            !length(StopWatch$ControlDuration),!length(StopWatch$StroopDuration)
+          ))) {
+            group(firstTest())
+          }
+          
+          if (group() != "Stroop") {
+            df <- df1
+          }
+          
+          StopWatch$Start(treatment = group())
+          active(TRUE)
+          
+          # Plot using ggplot2
+          ggplot(df, aes(
+            x = factor(x),
+            y = y,
+            label = word,
+            color = color
+          )) +
+            geom_text(size = 12) +
+            scale_x_discrete(limits = factor(1:4)) +
+            scale_color_identity() +
+            theme_void() +
+            theme(legend.position = "none") +
+            coord_fixed() +
+            my_theme
         }
-        
-        StopWatch$Start(treatment = group())
-        active(TRUE)
-        
-        # Plot using ggplot2
-        ggplot(df, aes(
-          x = factor(x),
-          y = y,
-          label = word,
-          color = color
-        )) +
-          geom_text(size = 15) +
-          scale_x_discrete(limits = factor(1:4)) +
-          scale_color_identity() +
-          theme_void() +
-          theme(legend.position = "none") +
-          coord_fixed() +
-          my_theme +
-          ggtitle(paste("Group:", group()))
       })
       
       output$stroop_plot <- renderPlot({
@@ -170,23 +245,31 @@ mod_stroop_test_server <-
       })
       
       observeEvent(input$stop, {
-        StopWatch$Stop(Treatment = group())
-        
+        updateActionButton(inputId = "start", disabled = FALSE)
+        updateActionButton(inputId = "stop", disabled = TRUE)
+        StopWatch$Stop(treatment = group())
         currentDuration <-
-          StopWatch[paste0(group, "Duration")]
+          as.numeric(StopWatch[[paste0(group(), "Duration")]], format = "seconds")
         
         # Reset State
         timer(0)
         active(FALSE)
         
         showModal(modalDialog(
-          title = "Congratulations",
           tagList(
-            h2(Timer[paste0(group, "Duration")]),
-            p(sprintf("seconds. For the %s group", group())),
-            p(
-              "Click \"Submit\" to enter your time and compare how you did against the rest of your class"
-            )
+            value_box(
+              title = h2("Time"),
+              value = round(StopWatch[[paste0(group(), "Duration")]], 2),
+              showcase = bs_icon("stopwatch"),
+              theme = "primary",
+              p("seconds"),
+            ),
+            if (experiment() == 1) {
+              p("Be sure to carry out the second experiment to see how your results compare.")
+            } else {
+              p("Be sure to compare your result to the rest of the class.")
+            },
+            p("Click \"Confirm\" to enter your result")
           ),
           footer = tagList(
             actionButton(ns("cancel"), "Cancel", style = "background-color: red; color: white;"),
@@ -196,17 +279,41 @@ mod_stroop_test_server <-
       })
       
       observeEvent(input$confirm, {
+        if (all(c(
+          length(StopWatch$ControlDuration),
+          length(StopWatch$StroopDuration)
+        ))) {
+          output$time2 <- renderText({
+            as.character(round(as.numeric(StopWatch$Time2, format = "seconds"),
+                               2))
+          })
+        } else {
+          output$time1 <- renderText({
+            as.character(round(as.numeric(StopWatch$Time1, format = "seconds"),
+                               2))
+          })
+          experiment("2")
+          # Change to second group
+          group(choices[!(choices %in% group())])
+        }
+        
+        # Enable the submit button if both the requiset times are available
+        if (all(length(StopWatch$StroopDuration) &&
+                length(StopWatch$ControlDuration))) {
+          updateActionButton(inputId = "submit", disabled = FALSE)
+        }
+        
         removeModal()
       })
       
       observeEvent(input$cancel, {
-        # Reset time for that group
-        StopWatch$Reset(treatment = group)
         removeModal()
       })
       
-      
       observeEvent(input$submit, {
+        StopWatch$SetInitials(value = input$initials)
+        StopWatch$SetGroup(value = input$group)
+        
         if (is.null(application_state$GoogleSheets)) {
           sendSweetAlert(
             session = session,
@@ -216,7 +323,7 @@ mod_stroop_test_server <-
             type = "info"
           )
         } else if (isTRUE((!isTruthy(class_data()) &&
-                           nrow(class_data()) > 0))) {
+                           nrow(StopWatch$GetData()) < 2))) {
           sendSweetAlert(
             session = session,
             title = "No Data to Upload",
@@ -225,17 +332,48 @@ mod_stroop_test_server <-
             type = "warning"
           )
         } else {
-          saveData(
-            id = application_state$GoogleSheets,
-            data = StopWatch$GetData()
-          )
-          sendSweetAlert(
-            session = session,
-            title = "Data Successfully Uploaded!",
-            text = "Your time was successfully uploaded. Be sure to check how your compare to the rest of your class",
-            type = "success"
-          )
+          timediff <- StopWatch$StroopDuration - StopWatch$ControlDuration
+          
+          text <- ifelse(timediff < 0, "quicker", "slower")
+          
+          showModal(modalDialog(
+            value_box(
+              title = h2("Outcome"),
+              value = abs(round(as.numeric(timediff), 2)),
+              showcase = bs_icon("speedometer"),
+              theme = "primary",
+              p(sprintf("seconds %s on the control",
+                        text))
+            ),
+            p(
+              "Your results are being uploaded to the rest of the class data."
+            )
+          ))
+          
+          saveData(id = application_state$GoogleSheets,
+                   data = StopWatch$GetData())
+          # sendSweetAlert(
+          #   session = session,
+          #   title = "Data Successfully Uploaded!",
+          #   text = "Your results were successfully uploaded. Be sure to check how your results compare to the rest of the class",
+          #   type = "success"
+          # )
         }
+        
+        
+        # Resetting the State
+        updateTextInput(inputId = "initials", value = "")
+        updateActionButton(inputId = "start", disabled = TRUE)
+        updateActionButton(inputId = "stop", disabled = TRUE)
+        updateActionButton(inputId = "submit", disabled = TRUE)
+        experiment("1")
+        output$time1 <- renderText({
+          "-"  # Default message before any updates
+        })
+        output$time2 <- renderText({
+          "-"  # Default message before any updates
+        })
+        StopWatch$Reset()
       })
     })
   }

@@ -7,22 +7,50 @@ StopWatch <-
     cloneable = FALSE,
     public = list(
       Start = function(treatment) {
-        private[paste0(treatment, "Start")] <- Sys.time()
+        private[[paste0(".", treatment, "Start")]] <- Sys.time()
       },
       Stop = function(treatment) {
-        private[paste0(treatment, "Stop")] <- Sys.time()
+        private[[paste0(".", treatment, "Stop")]] <- Sys.time()
+        
+        if (!length(private$.order)) {
+            if(treatment == "Control") {
+              private$.order <- c("Control" = 1, "Stroop" = 2)
+            } else {
+              private$.order <- c("Control" = 2, "Stroop" = 1)
+            }
+        }
       },
-      Reset = function(treatment) {
-        private[paste0(treatment, c("Start", "Stop"))]  <- numeric(0L)
-      }, 
+      SetInitials = function(value) {
+        private$.initials <- value
+      },
+      SetGroup = function(value) {
+        private$.group <- value
+      },
+      Reset = function(fields = c(
+        "initials",
+        "group",
+        "order",
+        "StroopStart",
+        "StroopStop",
+        "ControlStart",
+        "ControlStop"
+      )) {
+        lapply(fields, function(field) {
+          private[[paste0(".", field)]] <- NULL
+        })
+      },
       GetData = function() {
         data.frame(
           ID = UUIDgenerate(n = 2L),
+          Date = as.character(Sys.Date()),
           Initials = private$.initials,
-          Group = c("Control", "Stroop"),
-          Sex = private$.sex,
-          Value = c(as.numeric(self$ControlDuration, units = "secs"), 
-                    as.numeric(self$StroopDuration, units = "secs"))
+          Group = private$.group,
+          Order = private$.order,
+          Test = c("Control", "Stroop"),
+          Value = c(
+            as.numeric(self$ControlDuration, units = "secs"),
+            as.numeric(self$StroopDuration, units = "secs")
+          )
         )
       }
     ),
@@ -32,10 +60,18 @@ StopWatch <-
       },
       ControlDuration = function(value) {
         private$.ControlStop - private$.ControlStart
+      },
+      Time1 = function(value) {
+        self[[paste0(names(private$.order[private$.order == 1]), "Duration")]]
+      },
+      Time2 = function(value) {
+        self[[paste0(names(private$.order[private$.order == 2]), "Duration")]]
       }
     ),
     private = list(
       .initials = character(0L),
+      .group = "Group A",
+      .order = numeric(0L),
       .StroopStart = numeric(0L),
       .StroopStop = numeric(0L),
       .ControlStart = numeric(0L),
