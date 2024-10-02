@@ -41,7 +41,7 @@ StopWatch <-
       },
       GetData = function() {
         data.frame(
-          ID = UUIDgenerate(n = 2L),
+          ID = rep(UUIDgenerate(n = 1L), 2),
           Date = as.character(Sys.Date()),
           Initials = private$.initials,
           Group = private$.group,

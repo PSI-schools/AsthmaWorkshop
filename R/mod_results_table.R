@@ -40,25 +40,30 @@ mod_results_table_server <-
         
         # Datawrangliing of data for table 
         data <- class_data() |>
+          select(c("ID", "Initials", "Group", "Test", "Value")) |>
           pivot_wider(names_from = Test, 
                       values_from = Value)
+        
+        data$diff <- data$Stroop - data$Control
         
         reactable(data = data,
                   columns = list(
                     ID = colDef(show = FALSE),
-                    Date = colDef(show = FALSE),
-                    Control = colDef(name = "Control Time", 
+                    Control = colDef(name = "Control Time (s)", 
                                     format = colFormat(digits = 2)),
-                    Stroop = colDef(name = "Stroop Time", 
-                                   format = colFormat(digits = 2))
+                    Stroop = colDef(name = "Stroop Time (s)", 
+                                   format = colFormat(digits = 2)), 
+                    diff = colDef(name = "Time Difference (s)", 
+                                  format = colFormat(digits = 2))
                   ),
                   # Global table options
                   pagination = TRUE,
                   highlight = TRUE,
                   bordered = TRUE,
                   striped = TRUE,
-                  defaultPageSize = 10,
-                  searchable = TRUE,
+                  defaultPageSize = 20,
+                  defaultSorted = list(diff = "asc"),
+                  searchable = FALSE,
                   theme = reactableTheme(
                     borderColor = "#D3D3D3",
                     stripedColor = "#F9F9F9",

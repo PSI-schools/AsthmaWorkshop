@@ -10,8 +10,8 @@ summariseDataset <- function(dataset) {
   stopifnot(is.data.frame(dataset),
             c("Test", "Value") %in% names(dataset))
   
-  
   data <- dataset |>
+    select(c("ID", "Initials", "Group", "Test", "Value")) |>
     pivot_wider(names_from = Test,
                 values_from = Value)
   
@@ -19,7 +19,7 @@ summariseDataset <- function(dataset) {
   
   return(
     list(
-      Leader = data$Initials[which.max(data$diff)],
+      Leader = data$Initials[which.min(data$diff)],
       ControlMean = mean(data$Control),
       StroopMean = mean(data$Stroop),
       MeanDifference = mean(data$diff)

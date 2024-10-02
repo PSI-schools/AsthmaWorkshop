@@ -35,7 +35,9 @@ golem::add_utils("loadData")
 golem::add_utils("checkFunction")
 golem::add_fct("randomisationOrder")
 golem::add_fct("summariseDataset")
-
+golem::add_fct("stroopPlot")
+golem::add_fct("histogram_question")
+golem::add_fct("boxplot_question")
 
 ## External resources
 ## Creates .js and .css files at inst/app/www

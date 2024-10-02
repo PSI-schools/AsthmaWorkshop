@@ -62,20 +62,19 @@ mod_score_cards_server <- function(id, dataset) {
     
     
     output$leader <- renderText({
-      browser()
       info$leader
     })
     
     output$control <- renderText({
-      info$control
+      round(info$control, 2)
     })
     
     output$stroop <- renderText({
-      info$stroop
+      round(info$stroop, 2)
     })
     
     output$difference <- renderText({
-      info$difference
+      round(info$difference, 2)
     })
   })
 }

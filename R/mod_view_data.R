@@ -6,29 +6,61 @@
 #'
 #' @noRd
 #'
-#' @importFrom bslib page_fluid card layout_sidebar
-#' @importFrom shinyWidgets awesomeCheckbox
+#' @importFrom bslib page_fillable card layout_sidebar
+#' @importFrom shinyWidgets awesomeCheckbox prettyRadioButtons
 
 mod_view_data_ui <- function(id) {
   ns <- NS(id)
-  page_fluid(card(layout_sidebar(
+  page_fillable(card(layout_sidebar(
     sidebar = sidebar(
-      title = "Customise",
       position = "left",
-      open = TRUE,
+      open = "always",
       radioGroupButtons(
         inputId = ns("plot_type"),
         label = with_red_star("Plot"),
-        choices = c(
-          "Histogram" = "Histogram",
-          "Boxplot" = "BoxPlot"
-          # "CDF Plot" = "CDFPlot"
-          # ,
-          # "CI Plot" = "CIPlot"
-        ),
+        choices = c("Histogram" = "Histogram",
+                    "Boxplot" = "BoxPlot"),
+        # "CDF Plot" = "CDFPlot"
+        # ,
+        # "CI Plot" = "CIPlot"),
         selected = "Histogram",
-        direction = "vertical"
+        direction = "horizontal"
+      ),
+      strong("Test Your Understanding"),
+      # Only show this panel if the plot type is a histogram
+      conditionalPanel(
+        condition = "input.plot_type == 'Histogram'",
+        ns = ns,
+        prettyRadioButtons(
+          inputId = ns("histogram_question"),
+          label = "Which time bin contained the most students?",
+          choices = c("1", "2", "3"),
+          icon = icon("check"),
+          bigger = TRUE,
+          status = "info",
+          animation = "tada"
+        ),
+        actionButton(inputId = ns("hist_submit"), label = "Submit"),
+        textOutput(ns("histogram_feedback"))
+      ),
+      # Only show this panel if Custom is selected
+      conditionalPanel(
+        condition = "input.plot_type == 'BoxPlot'",
+        ns = ns,
+        prettyRadioButtons(
+          inputId = ns("boxplot_question"),
+          label = "What is the median value?",
+          choices = c("1", "2", "3"),
+          icon = icon("check"),
+          bigger = TRUE,
+          status = "info",
+          animation = "tada"
+        ),
+        actionButton(inputId = ns("boxplot_submit"), label = "Submit"),
+        textOutput(ns("boxplot_feedback"))
       )
+      
+      
       # ,
       # wellPanel(
       #   h2("Customise Plot"),
@@ -58,6 +90,29 @@ mod_view_data_server <- function(id, class_data, user_choices) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    boxplotQuestion <-
+      reactiveValues(
+        question = "A box and whisker plot displays the marks of students in a maths exam.
+        The plot shows that the minimum mark is 30, the lower quartile is 45, the median
+        is 60, the upper quartile is 75, and the maximum mark is 90",
+        ChoiceA = "25%",
+        ChoiceB = "50%",
+        ChoiceC = "75%",
+        ChoiceD = "100%",
+        Answer = "Choice B"
+      )
+    
+    histogramQuestion <-
+      reactiveValues(
+        question = "A histogram displays the number of hours students spent studying
+        for their exams. The bars are tallest in the range of 5-10 hours, with
+        fewer students studying for more or fewer hours.",
+        ChoiceA = "Most students studied for 5-10 hours.",
+        ChoiceB = "The data is evenly spread across all study hours.",
+        ChoiceC = "No student studied for more than 10 hours.",
+        ChoiceD = "The histogram shows a normal distribution.",
+        Answer = "Choice A"
+      )
     
     output$plot <- renderPlot({
       validate(
@@ -71,16 +126,21 @@ mod_view_data_server <- function(id, class_data, user_choices) {
       switch(
         input$plot_type,
         "Histogram" = {
+        
+          data$diff <- data$Stroop -  data$Control
+          
           plot <- ggplot(data = class_data(),
                          aes(
                            x = Value,
-                           y = after_stat(density),
+                           y = after_stat(count),
                            fill = Test
                          )) +
             geom_histogram(color = MyPallette$black,
-                           alpha = 0.7) +
+                           alpha = 0.7, 
+                           binwidth = 1L) +
             labs(x = user_choices$ValueLabel,
                  y = "Frequency Density") +
+            scale_x_continuous(breaks = seq(floor(min(class_data()$Value)), ceiling(max(class_data()$Value)), by = 1)) +
             scale_fill_manual(
               "Test",
               labels = c("Control", "Stroop"),
@@ -91,7 +151,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
               labels = c("Control", "Stroop"),
               values = c(MyPallette$col_pla, MyPallette$col_drug)
             ) +
-            facet_grid(rows = vars(Group)) +
+            # facet_grid(rows = vars(Group)) +
             theme(
               panel.background = element_rect(fill = MyPallette$grey),
               panel.grid = element_line(),
@@ -118,8 +178,8 @@ mod_view_data_server <- function(id, class_data, user_choices) {
                 size = 1,
                 linetype = "solid"
               ),
-              panel.spacing.y = unit(2, "lines"),
-              legend.position = "none"
+              panel.spacing.y = unit(2, "lines")
+              # legend.position = "none"
             )
           
           if (isTRUE(input$labels)) {
@@ -164,7 +224,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
               labels = c("Control", "Stroop"),
               values = c(MyPallette$col_pla, MyPallette$col_drug)
             ) +
-            facet_grid(rows = vars(Group)) + 
+            # facet_grid(rows = vars(Group)) +
             theme(
               panel.background = element_rect(fill = MyPallette$grey),
               panel.grid = element_line(),
@@ -191,9 +251,10 @@ mod_view_data_server <- function(id, class_data, user_choices) {
                 size = 1,
                 linetype = "solid"
               ),
-              panel.spacing.y = unit(2, "lines"),
-              legend.position = "none"
-            ) 
+              panel.spacing.y = unit(2, "lines")
+              # ,
+              # legend.position = "none"
+            )
           print(plot)
         },
         "CDFPlot" = {
@@ -234,7 +295,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
               "Group",
               labels = c("Group A", "Group B"),
               values = c(MyPallette$col_pla, MyPallette$col_drug)
-            ) + 
+            ) +
             theme(
               panel.background = element_rect(fill = MyPallette$grey),
               panel.grid = element_line(),
@@ -330,6 +391,66 @@ mod_view_data_server <- function(id, class_data, user_choices) {
           
         }
       )
+    })
+    
+    # Update the questions
+    observeEvent(class_data(), {
+      data <- class_data() |>
+        select(c("ID", "Initials", "Group", "Test", "Value")) |>
+        pivot_wider(names_from = Test,
+                    values_from = Value)
+      
+      data$diff <- data$Stroop - data$Control
+      
+      histChoices <- HistogramQuestion(values = data$diff)
+      
+      boxChoices <- BoxPlotQuestion(values = data$diff)
+      
+      boxplotQuestion$Question <- boxChoices[["Question"]]
+      boxplotQuestion$ChoiceA <- boxChoices[["ChoiceA"]]
+      boxplotQuestion$ChoiceB <- boxChoices[["ChoiceB"]]
+      boxplotQuestion$ChoiceC <- boxChoices[["ChoiceC"]]
+      boxplotQuestion$ChoiceD <- boxChoices[["ChoiceD"]]
+      boxplotQuestion$Answer <- boxChoices[["Answer"]]
+      
+      histogramQuestion$Question <- histChoices[["Question"]]
+      histogramQuestion$ChoiceA <- histChoices[["ChoiceA"]]
+      histogramQuestion$ChoiceB <- histChoices[["ChoiceB"]]
+      histogramQuestion$ChoiceC <- histChoices[["ChoiceC"]]
+      histogramQuestion$ChoiceD <- histChoices[["ChoiceD"]]
+      histogramQuestion$Answer <- histChoices[["Answer"]]
+      
+      
+      updateRadioButtons(
+        inputId = "histogram_question",
+        choices =           c(
+          histogramQuestion$ChoiceA,
+          histogramQuestion$ChoiceB,
+          histogramQuestion$ChoiceC,
+          histogramQuestion$ChoiceD
+        )
+      )
+      
+      updateRadioButtons(
+        inputId = "boxplot_question",
+        label = boxplotQuestion$Question,
+        choices =  c(
+          boxplotQuestion$ChoiceA,
+          boxplotQuestion$ChoiceB,
+          boxplotQuestion$ChoiceC,
+          boxplotQuestion$ChoiceD
+        )
+      )
+    })
+    
+    # Observe event when submit button is clicked
+    observeEvent(input$hist_submit, {
+      if (input$histogram_question == histogramQuestion$Answer) {
+        output$histogram_feedback <-
+          renderText("Correct! The histogram is Skewed Right.")
+      } else {
+        output$histogram_feedback <- renderText("Incorrect. Please try again.")
+      }
     })
     
     

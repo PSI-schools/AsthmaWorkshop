@@ -174,70 +174,27 @@ mod_stroop_test_server <-
         updateActionButton(inputId = "start", disabled = TRUE)
         updateActionButton(inputId = "stop", disabled = FALSE)
         
+        if (all(c(
+          !length(StopWatch$ControlDuration),
+          !length(StopWatch$StroopDuration)
+        ))) {
+          group(firstTest())
+        }
+        
         if (is.null(firstTest())) {
           sendSweetAlert(title = "Action Required",
                          type = "info",
                          text = "Click the randomisation button first")
         } else {
-          words <- c("RED", "BLUE", "GREEN", "PURPLE", "ORANGE")
-          colors <-
-            c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00")
-          my_dgrey <- "#f0f0f0"
+          plot <- StroopPlot(group = group())
           
-          my_theme <- theme(
-            text = element_text(size = 24),
-            plot.title = element_text(size = 25),
-            panel.background = element_rect(fill = my_dgrey),
-            panel.border = element_rect(fill = NA),
-            panel.grid = element_blank(),
-            axis.line = element_blank(),
-            axis.text = element_blank(),
-            axis.title = element_blank()
-          )
-          
-          df <- data.frame(
-            word = sample(words, 16, replace = TRUE),
-            color = sample(colors, 16, replace = TRUE),
-            x = rep(1:4, each = 4),
-            y = rep(1:4, times = 4)
-          )
-          
-          df1 <- data.frame(
-            (i = sample(1:5, 16, replace = TRUE)),
-            word = words[i],
-            color = colors[i],
-            x = rep(1:4, each = 4),
-            y = rep(1:4, times = 4)
-          )
-          
-          if (all(c(
-            !length(StopWatch$ControlDuration),!length(StopWatch$StroopDuration)
-          ))) {
-            group(firstTest())
-          }
-          
-          if (group() != "Stroop") {
-            df <- df1
-          }
-          
-          StopWatch$Start(treatment = group())
-          active(TRUE)
-          
-          # Plot using ggplot2
-          ggplot(df, aes(
-            x = factor(x),
-            y = y,
-            label = word,
-            color = color
-          )) +
-            geom_text(size = 12) +
-            scale_x_discrete(limits = factor(1:4)) +
-            scale_color_identity() +
-            theme_void() +
-            theme(legend.position = "none") +
-            coord_fixed() +
-            my_theme
         }
+        
+        StopWatch$Start(treatment = group())
+        active(TRUE)
+        
+        return(plot)
+        
       })
       
       output$stroop_plot <- renderPlot({
@@ -347,17 +304,21 @@ mod_stroop_test_server <-
             ),
             p(
               "Your results are being uploaded to the rest of the class data."
+            ),
+            footer = tagList(
+              actionButton(inputId = ns("new_student"), label = "New Student"),
+              actionButton(
+                inputId = ns("view_results"),
+                label = "View Results"
+              )
             )
           ))
           
-          saveData(id = application_state$GoogleSheets,
-                   data = StopWatch$GetData())
-          # sendSweetAlert(
-          #   session = session,
-          #   title = "Data Successfully Uploaded!",
-          #   text = "Your results were successfully uploaded. Be sure to check how your results compare to the rest of the class",
-          #   type = "success"
-          # )
+          saveData(
+            id = application_state$GoogleSheets,
+            data = StopWatch$GetData(),
+            with_progress = TRUE
+          )
         }
         
         
@@ -375,5 +336,16 @@ mod_stroop_test_server <-
         })
         StopWatch$Reset()
       })
+      
+      observeEvent(input$new_student,{
+        removeModal()
+      })
+      
+      observeEvent(input$view_results,{
+        removeModal()
+        # Code to Change tab
+        
+      })
+      
     })
   }
