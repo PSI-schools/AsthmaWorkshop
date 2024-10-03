@@ -15,6 +15,7 @@ mod_view_data_ui <- function(id) {
     sidebar = sidebar(
       position = "left",
       open = "always",
+      width = 350,
       radioGroupButtons(
         inputId = ns("plot_type"),
         label = with_red_star("Plot"),
@@ -126,30 +127,35 @@ mod_view_data_server <- function(id, class_data, user_choices) {
       switch(
         input$plot_type,
         "Histogram" = {
-        
-          data$diff <- data$Stroop -  data$Control
-          
           plot <- ggplot(data = class_data(),
                          aes(
                            x = Value,
                            y = after_stat(count),
                            fill = Test
                          )) +
-            geom_histogram(color = MyPallette$black,
-                           alpha = 0.7, 
-                           binwidth = 1L) +
-            labs(x = user_choices$ValueLabel,
-                 y = "Frequency Density") +
-            scale_x_continuous(breaks = seq(floor(min(class_data()$Value)), ceiling(max(class_data()$Value)), by = 1)) +
+            geom_histogram(
+              color = MyPallette$black,
+              alpha = 0.7,
+              binwidth = 1L,
+              center = 0.5
+            ) +
+            labs(x = "Time taken (seconds)",
+                 y = "Count",
+                 title = "Histogram Showing the Time Taken (Seconds) to Complete the Stroop Experiment and Control") +
+            scale_x_continuous(breaks = seq(floor(min(
+              class_data()$Value
+            )), ceiling(max(
+              class_data()$Value
+            )), by = 1)) +
             scale_fill_manual(
               "Test",
               labels = c("Control", "Stroop"),
-              values = c(MyPallette$col_pla, MyPallette$col_drug)
+              values = c(colours$control, colours$stroop)
             ) +
             scale_color_manual(
-              "Test",
+              "Experiment",
               labels = c("Control", "Stroop"),
-              values = c(MyPallette$col_pla, MyPallette$col_drug)
+              values = c(colours$control, colours$stroop)
             ) +
             # facet_grid(rows = vars(Group)) +
             theme(
@@ -160,13 +166,10 @@ mod_view_data_server <- function(id, class_data, user_choices) {
                 linewidth = 0.25,
                 linetype = 1
               ),
-              axis.text.x = element_text(colour = MyPallette$black,
-                                         size = 20),
-              axis.title.x = element_text(colour = MyPallette$black,
-                                          size = 20),
-              axis.line.y = element_blank(),
-              axis.text.y = element_blank(),
-              axis.ticks.y = element_blank(),
+              axis.text = element_text(colour = MyPallette$black,
+                                       size = 20),
+              axis.title = element_text(colour = MyPallette$black,
+                                        size = 20),
               strip.text = element_text(
                 angle = 0,
                 size = 16,
@@ -178,8 +181,11 @@ mod_view_data_server <- function(id, class_data, user_choices) {
                 size = 1,
                 linetype = "solid"
               ),
-              panel.spacing.y = unit(2, "lines")
-              # legend.position = "none"
+              panel.spacing.y = unit(2, "lines"),
+              legend.text = element_text(size = 14),
+              legend.title = element_text(size = 16),
+              legend.key.size = unit(1.5, "cm") ,
+              title.text = element_text(size = 16)
             )
           
           if (isTRUE(input$labels)) {
@@ -218,11 +224,12 @@ mod_view_data_server <- function(id, class_data, user_choices) {
             geom_boxplot(width = 1,
                          color = MyPallette$black,
                          alpha = 0.7) +
-            labs(x = user_choices$ValueLabel) +
+            labs(x = "Time Taken (Seconds)",
+                 title = "Box and Whisker Plot Showing the Time Taken (Seconds) to Complete the Stroop Experiment and Control") +
             scale_fill_manual(
-              "Test",
+              "Experiment",
               labels = c("Control", "Stroop"),
-              values = c(MyPallette$col_pla, MyPallette$col_drug)
+              values = c(colours$control, colours$stroop)
             ) +
             # facet_grid(rows = vars(Group)) +
             theme(
@@ -251,10 +258,22 @@ mod_view_data_server <- function(id, class_data, user_choices) {
                 size = 1,
                 linetype = "solid"
               ),
-              panel.spacing.y = unit(2, "lines")
-              # ,
-              # legend.position = "none"
-            )
+              panel.spacing.y = unit(2, "lines"),
+              legend.text = element_text(size = 14),
+              legend.title = element_text(size = 16),
+              legend.key.size = unit(2.5, "cm"),
+              title.text = element_text(size = 16)
+            ) +
+            scale_x_continuous(breaks = seq(floor(min(
+              class_data()$Value
+            )), ceiling(max(
+              class_data()$Value
+            )), by = 2), 
+          label = seq(floor(min(
+            class_data()$Value
+          )), ceiling(max(
+            class_data()$Value
+          )), by = 2))
           print(plot)
         },
         "CDFPlot" = {
@@ -395,16 +414,10 @@ mod_view_data_server <- function(id, class_data, user_choices) {
     
     # Update the questions
     observeEvent(class_data(), {
-      data <- class_data() |>
-        select(c("ID", "Initials", "Group", "Test", "Value")) |>
-        pivot_wider(names_from = Test,
-                    values_from = Value)
+      histChoices <- HistogramQuestion(values = class_data()$Value)
       
-      data$diff <- data$Stroop - data$Control
-      
-      histChoices <- HistogramQuestion(values = data$diff)
-      
-      boxChoices <- BoxPlotQuestion(values = data$diff)
+      boxChoices <-
+        BoxPlotQuestion(values = class_data()$Value[class_data()$Test == "Stroop"], group = "Stroop")
       
       boxplotQuestion$Question <- boxChoices[["Question"]]
       boxplotQuestion$ChoiceA <- boxChoices[["ChoiceA"]]
@@ -447,9 +460,20 @@ mod_view_data_server <- function(id, class_data, user_choices) {
     observeEvent(input$hist_submit, {
       if (input$histogram_question == histogramQuestion$Answer) {
         output$histogram_feedback <-
-          renderText("Correct! The histogram is Skewed Right.")
+          renderText("Correct!")
       } else {
-        output$histogram_feedback <- renderText("Incorrect. Please try again.")
+        output$histogram_feedback <-
+          renderText("Not quite, Please try again.")
+      }
+    })
+    
+    observeEvent(input$boxplot_submit, {
+      if (input$boxplot_question == as.character(round(boxplotQuestion$Answer, 2))) {
+        output$boxplot_feedback <-
+          renderText("Correct!")
+      } else {
+        output$boxplot_feedback <-
+          renderText("Not quite, Please try again.")
       }
     })
     

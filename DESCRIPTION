@@ -13,6 +13,7 @@ Depends:
     R (>= 2.10)
 Imports: 
     bslib,
+    bsicons,
     config (>= 0.3.2),
     dplyr,
     emojifont,

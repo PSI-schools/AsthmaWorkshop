@@ -18,7 +18,7 @@ HistogramQuestion <- function(values, ...) {
   
   Answer <- interval_counts[which.max(interval_counts)]
   
-  potentialAnswers <- interval_counts[interval_counts <interval_counts[which.max(interval_counts)]]
+  potentialAnswers <- interval_counts[interval_counts < interval_counts[which.max(interval_counts)]]
   
   Answers <-
     c(c(Answer = names(interval_counts[which.max(interval_counts)])),

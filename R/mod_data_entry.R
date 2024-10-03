@@ -343,8 +343,7 @@ mod_stroop_test_server <-
       
       observeEvent(input$view_results,{
         removeModal()
-        # Code to Change tab
-        
+        updateNavbarPage(session, "navbar", selected = "results")
       })
       
     })

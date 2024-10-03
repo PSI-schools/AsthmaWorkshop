@@ -13,22 +13,33 @@ mod_score_cards_ui <- function(id) {
     value_box(
       title = "Leader",
       value = textOutput(ns("leader")),
-      showcase = bs_icon("person-arms-up")
+      showcase = bs_icon("person-arms-up"), 
+      class = "bg-secondary",
+      min_height = "120px"
     ),
     value_box(
-      title = "control",
+      title = "Mean Control Experiment",
       value = textOutput(ns("control")),
-      showcase = bs_icon("segmented-nav")
+      p("seconds"), 
+      showcase = bs_icon("segmented-nav"),
+      class = "bg-secondary",
+      min_height = "120px"
     ),
     value_box(
-      title = "stroop",
+      title = "Mean Stroop Experiment",
       value = textOutput(ns("stroop")),
-      showcase = bs_icon("trophy-fill")
+      p("seconds"), 
+      showcase = bs_icon("trophy-fill"), 
+      class = "bg-secondary",
+      min_height = "120px"
     ),
     value_box(
-      title = "Difference",
+      title = "Mean Difference",
       value = textOutput(ns("difference")),
-      showcase = bs_icon("layout-split")
+      p("seconds"), 
+      showcase = bs_icon("layout-split"),
+      class = "bg-secondary", 
+      min_height = "120px"
     )
   ))
 }
