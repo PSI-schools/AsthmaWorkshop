@@ -8,6 +8,9 @@
 #' 
 
 StroopPlot <- function(group, ...) {
+  
+  Sys.sleep(0.5)
+  
   words <- c("RED", "BLUE", "GREEN", "PURPLE", "ORANGE")
   colors <-
     c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00")

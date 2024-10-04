@@ -17,6 +17,7 @@ Imports:
     config (>= 0.3.2),
     dplyr,
     emojifont,
+    extrafont,
     ggplot2,
     golem (>= 0.4.1),
     googledrive,

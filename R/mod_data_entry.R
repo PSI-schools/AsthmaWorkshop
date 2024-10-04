@@ -114,7 +114,7 @@ mod_stroop_test_ui <- function(id) {
     ),
     card(
       card_header(h2("Experiment"), class = "bg-primary"),
-      card_body(plotOutput(ns("stroop_plot"), width = "auto"))
+      card_body(plotOutput(ns("stroop_plot"), width = "100%"))
     )
   )
 }
@@ -131,7 +131,8 @@ mod_stroop_test_ui <- function(id) {
 mod_stroop_test_server <-
   function(id,
            class_data,
-           application_state) {
+           application_state, 
+           trigger) {
     moduleServer(id, function(input, output, session) {
       ns <- session$ns
       
@@ -342,9 +343,8 @@ mod_stroop_test_server <-
       })
       
       observeEvent(input$view_results,{
+        trigger(UUIDgenerate())
         removeModal()
-        updateNavbarPage(session, "navbar", selected = "results")
       })
-      
     })
   }

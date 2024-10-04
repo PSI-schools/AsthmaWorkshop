@@ -8,6 +8,10 @@
 #' @noRd
 app_server <- function(input, output, session) {
   
+  dir.create('~/.fonts')
+  file.copy("www/FontAwesome.ttf", "~/.fonts")
+  system('fc-cache -f ~/.fonts')
+  
   library(ggplot2)
   library(extrafont)
   gs4_deauth()
@@ -59,11 +63,20 @@ app_server <- function(input, output, session) {
       }
   )
   
+  trigger <- reactiveVal()
+  
+  observeEvent(trigger(), {
+    updateNavbarPage(session, "navbar", selected = "results")
+  }, ignoreInit = TRUE)
+  
+  
   mod_stroop_test_server(
     "stroop_test",
     class_data = classData,
-    application_state = applicationState
+    application_state = applicationState, 
+    trigger = trigger
   )
+  
   mod_results_table_server("results_table", 
                            class_data = classData, 
                            user_choices = userChoices)
