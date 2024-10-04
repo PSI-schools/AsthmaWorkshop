@@ -8,7 +8,9 @@
 
 #' @importFrom googlesheets4 sheet_append
 
-saveData <- function(id, data, with_progress = TRUE, ...) {
+saveData <- function(id, data, with_progress = TRUE, online = FALSE, dataset = NULL, ...) {
+  
+  if (isTRUE(online)) {
   
   stopifnot(is.character(id), is.data.frame(data))
   
@@ -31,6 +33,9 @@ saveData <- function(id, data, with_progress = TRUE, ...) {
     setProgress(value = 1.0, message = "Uploading Complete")
     Sys.sleep(0.2)
   })
+  } else {
+    rbind(dataset, data)
+  }
   
   
 } 

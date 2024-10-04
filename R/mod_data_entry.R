@@ -315,11 +315,17 @@ mod_stroop_test_server <-
             )
           ))
           
-          saveData(
+          dataset <- class_data()
+          
+          updatedData <- saveData(
             id = application_state$GoogleSheets,
             data = StopWatch$GetData(),
-            with_progress = TRUE
-          )
+            with_progress = TRUE, 
+            online = FALSE,
+            dataset = dataset)
+          
+          class_data(updatedData)
+          
         }
         
         

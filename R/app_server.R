@@ -29,39 +29,50 @@ app_server <- function(input, output, session) {
       Treatment = c("Control", "Placebo")
     )
   
-  classData <-
-    reactivePoll(
-      20000,
-      session,
-      checkFunc = function(id = applicationState$GoogleSheets) {
-        if (is.null(id)) {
-          return(invisible(NULL))
-        } else {
-          availableSheets <- drive_find(type = "spreadsheet")
-          
-          if (id %notin% availableSheets$id) {
-            cat(sprintf("GoogleSheets id:%s does not exist or you do not have permission to access it", id))
-                return(invisible(NULL))
-          }
-          
-          return(availableSheets[availableSheets$id == id,][["drive_resource"]][[1L]][["modifiedTime"]])
-        }
-      },
-      valueFunc = function(id = applicationState$GoogleSheets) {
-        if (is.null(id)) {
-          return(data.frame(
-            ID = character(0L),
-            Initials = character(0L),
-            Group = character(0L),
-            Order = numeric(0L),
-            Test = character(0L),
-            Value = numeric(0L)
-          ))
-        }
-        # Read the data
-        read_sheet(ss = id)
-      }
-  )
+  # classData <-
+  #   reactivePoll(
+  #     20000,
+  #     session,
+  #     checkFunc = function(id = applicationState$GoogleSheets) {
+  #       if (is.null(id)) {
+  #         return(invisible(NULL))
+  #       } else {
+  #         availableSheets <- drive_find(type = "spreadsheet")
+  #         
+  #         if (id %notin% availableSheets$id) {
+  #           cat(sprintf("GoogleSheets id:%s does not exist or you do not have permission to access it", id))
+  #               return(invisible(NULL))
+  #         }
+  #         
+  #         return(availableSheets[availableSheets$id == id,][["drive_resource"]][[1L]][["modifiedTime"]])
+  #       }
+  #     },
+  #     valueFunc = function(id = applicationState$GoogleSheets) {
+  #       if (is.null(id)) {
+  #         return(data.frame(
+  #           ID = character(0L),
+  #           Initials = character(0L),
+  #           Group = character(0L),
+  #           Order = numeric(0L),
+  #           Test = character(0L),
+  #           Value = numeric(0L)
+  #         ))
+  #       }
+  #       # Read the data
+  #       read_sheet(ss = id)
+  #     }
+  # )
+  
+  # Code if internet not working
+  classData <- reactiveVal(value = data.frame(
+    ID = character(0L),
+    Initials = character(0L),
+    Group = character(0L),
+    Order = numeric(0L),
+    Test = character(0L),
+    Value = numeric(0L)
+  ))
+  # ---------------------
   
   trigger <- reactiveVal()
   

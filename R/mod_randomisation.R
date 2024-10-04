@@ -171,6 +171,9 @@ mod_randomisation_server <- function(id, dataset = NULL) {
         })
         
         output$randomisationOrder <- renderPlot({
+          validate(
+            need(nrow(dataset()) >2, "To display previous class data please add more data")
+          )
           # invalidateLater(4000, session)
           req(dataset())
           randomisationOrder(data = dataset())
