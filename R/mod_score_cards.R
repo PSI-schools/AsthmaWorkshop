@@ -61,7 +61,7 @@ mod_score_cards_server <- function(id, dataset) {
     
     
     observe({
-      req(dataset())
+      req(dataset(), nrow(dataset()) >1)
      
       outcome <- summariseDataset(dataset())
       

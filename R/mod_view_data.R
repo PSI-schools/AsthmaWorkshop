@@ -414,6 +414,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
     
     # Update the questions
     observeEvent(class_data(), {
+      req(nrow(class_data()) > 4)
       histChoices <- HistogramQuestion(values = class_data()$Value)
       
       boxChoices <-
