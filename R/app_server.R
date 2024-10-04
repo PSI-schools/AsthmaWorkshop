@@ -31,7 +31,7 @@ app_server <- function(input, output, session) {
   
   classData <-
     reactivePoll(
-      20000,
+      10000,
       session,
       checkFunc = function(id = applicationState$GoogleSheets) {
         if (is.null(id)) {
