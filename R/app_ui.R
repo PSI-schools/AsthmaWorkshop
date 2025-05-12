@@ -11,15 +11,19 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    page_navbar(title = "Asthma Workshop", 
+    page_navbar(title = "PSI Schools Outreach", 
                 theme = psi_theme,
+                id = "navbar",
                 bg = "#00638e",
                 nav_panel(icon("home"), mod_landing_page_ui("home")), 
-                nav_panel("Data Entry", mod_data_entry_ui("data_entry")), 
+                nav_panel("Stroop Test", mod_stroop_test_ui("stroop_test")), 
+                nav_panel("Results", value = "results", mod_results_table_ui("results_table")),
                 nav_panel("View Data", mod_view_data_ui("view_data")), 
                 nav_spacer(), 
-                nav_panel("Find Out More", mod_further_details_ui("further_details")),
-                nav_panel(icon("gear"), mod_admin_ui("admin")))
+                nav_panel("Find Out More", mod_further_details_ui("further_details"))
+                # ,
+                # nav_panel(icon("gear"), mod_admin_ui("admin"))
+                )
   )
 }
 
@@ -41,7 +45,5 @@ golem_add_external_resources <- function() {
       path = app_sys("app/www"),
       app_title = "AsthmaWorkshop"
     )
-    # Add here other external resources
-    # for example, you can add shinyalert::useShinyalert()
   )
 }

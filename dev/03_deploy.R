@@ -34,8 +34,8 @@ golem::add_shinyappsio_file()
 # In command line.
 options(rsconnect.packrat = TRUE)
 rsconnect::deployApp(
-  appName = desc::desc_get_field("Package"),
-  appTitle = desc::desc_get_field("Package"),
+  appName = "StroopTest",
+  appTitle = "StroopTest",
   appFiles = c(
     # Add any additional files unique to your app here.
     "R/",
@@ -43,7 +43,8 @@ rsconnect::deployApp(
     "NAMESPACE",
     "DESCRIPTION",
     "app.R",
-    ".secrets/"
+    ".secrets/",
+    ".Renviron"
   ),
   appId = rsconnect::deployments(".")$appID,
   lint = FALSE,

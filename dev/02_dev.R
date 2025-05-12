@@ -20,18 +20,25 @@ attachment::att_amend_desc()
 
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module(name = "landing_page", with_test = TRUE) 
-golem::add_module(name = "data_entry", with_test = TRUE) 
-golem::add_module(name = "view_data", with_test = TRUE) 
-golem::add_module(name = "admin", with_test = TRUE) 
-golem::add_module(name = "further_details", with_test = TRUE) 
+golem::add_module(name = "landing_page", with_test = TRUE)
+golem::add_module(name = "stroop_test", with_test = TRUE)
+golem::add_module(name = "view_data", with_test = TRUE)
+golem::add_module(name = "admin", with_test = TRUE)
+golem::add_module(name = "further_details", with_test = TRUE)
+golem::add_module(name = "randomisation", with_test = TRUE)
+golem::add_module(name = "score_cards", with_test = TRUE)
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
 golem::add_utils("saveData")
 golem::add_utils("loadData")
 golem::add_utils("checkFunction")
-
+golem::add_utils("resetData")
+golem::add_fct("randomisationOrder")
+golem::add_fct("summariseDataset")
+golem::add_fct("stroopPlot")
+golem::add_fct("histogram_question")
+golem::add_fct("boxplot_question")
 
 ## External resources
 ## Creates .js and .css files at inst/app/www
@@ -67,34 +74,6 @@ covrpage::covrpage()
 ##
 ## (You'll need GitHub there)
 usethis::use_github()
-
-# GitHub Actions
-usethis::use_github_action()
-# Chose one of the three
-# See https://usethis.r-lib.org/reference/use_github_action.html
-usethis::use_github_action_check_release()
-usethis::use_github_action_check_standard()
-usethis::use_github_action_check_full()
-# Add action for PR
-usethis::use_github_action_pr_commands()
-
-# Travis CI
-usethis::use_travis()
-usethis::use_travis_badge()
-
-# AppVeyor
-usethis::use_appveyor()
-usethis::use_appveyor_badge()
-
-# Circle CI
-usethis::use_circleci()
-usethis::use_circleci_badge()
-
-# Jenkins
-usethis::use_jenkins()
-
-# GitLab CI
-usethis::use_gitlab_ci()
 
 # You're now set! ----
 # go to dev/03_deploy.R

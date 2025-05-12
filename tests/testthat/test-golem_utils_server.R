@@ -1,16 +1,16 @@
-test_that("not_in works", {
-  expect_true(1 %not_in% 2:10)
-  expect_false(1 %not_in% 1:10)
+test_that("notin works", {
+  expect_true(1 %notin% 2:10)
+  expect_false(1 %notin% 1:10)
 })
 
-test_that("not_null works", {
-  expect_true(not_null(1))
-  expect_false(not_null(NULL))
+test_that("notnull works", {
+  expect_true(notnull(1))
+  expect_false(notnull(NULL))
 })
 
-test_that("not_na works", {
-  expect_true(not_na(1))
-  expect_false(not_na(NA))
+test_that("notna works", {
+  expect_true(notna(1))
+  expect_false(notna(NA))
 })
 
 test_that("drop_nulls works", {

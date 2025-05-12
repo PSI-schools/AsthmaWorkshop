@@ -1,8 +1,11 @@
 Package: AsthmaWorkshop
 Title: Asthma_Workshop
 Version: 0.9
-Authors@R: 
-    person("Gareth", "Burns", , "gareth.burns@exploristics.com", role = c("cre", "aut"))
+Authors@R: c(
+    person("Gareth", "Burns", "gareth.burns@exploristics.com", role = c("cre", "aut"))
+    person("Alex", "Spiers", email = "alex.d.spiers@gsk.com", role = "ctb"),
+    person("Steve", "Mallett", email = "steve.mallett@veramed.co.uk", role = "ctb")
+    )
 Description: A Shiny app for the PSI Schools initiative AsthmaWorkshop.
     This allows students to input and explore their on data on the Asthma
     Workshop.
@@ -13,21 +16,29 @@ Depends:
     R (>= 2.10)
 Imports: 
     bslib,
+    bsicons,
     config (>= 0.3.2),
     dplyr,
+    emojifont,
+    extrafont,
     ggplot2,
     golem (>= 0.4.1),
     googledrive,
     googlesheets4,
     htmltools,
+    lubridate,
+    R6,
     reactable,
     shiny (>= 1.8.1.1),
     shinyWidgets,
     tidyr,
     uuid
 Suggests: 
+    devtools, 
+    usethis,
+    rsconnect,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
