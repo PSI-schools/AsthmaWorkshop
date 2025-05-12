@@ -61,7 +61,7 @@ mod_stroop_test_ui <- function(id) {
       card(
         card_header(
           class = "bg-primary d-flex justify-content-between align-items-center",
-          strong("StopWatch"),
+          strong("Stop Watch"),
           div(
             actionButton(
               inputId = ns("start"),
@@ -131,32 +131,32 @@ mod_stroop_test_ui <- function(id) {
 mod_stroop_test_server <-
   function(id,
            class_data,
-           application_state, 
+           application_state,
            trigger) {
     moduleServer(id, function(input, output, session) {
       ns <- session$ns
-      
+
       active <- reactiveVal(FALSE)
       timer <- reactiveVal(0)
       group <- reactiveVal(NULL)
       experiment <- reactiveVal(NULL)
-      
+
       StopWatch <- StopWatch$new()
-      
+
       firstTest <-
         mod_randomisation_server("randomisation", dataset = class_data)
-      
+
       output$current_experiment <- renderText({
         experiment()
       })
-      
-      
+
+
       observe({
         req(isTruthy(firstTest()))
         updateActionButton(inputId = "start", disabled = FALSE)
         experiment("1")
       })
-      
+
       # For a effect of stopwatch timer counting up
       observe({
         invalidateLater(1000, session)
@@ -167,52 +167,52 @@ mod_stroop_test_server <-
           }
         })
       })
-      
+
       output$timer <-
         renderText(sprintf("%02d:%02d", timer() %/% 60, timer() %% 60))
-      
+
       stroopPlot <- eventReactive(input$start, {
         updateActionButton(inputId = "start", disabled = TRUE)
         updateActionButton(inputId = "stop", disabled = FALSE)
-        
+
         if (all(c(
           !length(StopWatch$ControlDuration),
           !length(StopWatch$StroopDuration)
         ))) {
           group(firstTest())
         }
-        
+
         if (is.null(firstTest())) {
           sendSweetAlert(title = "Action Required",
                          type = "info",
                          text = "Click the randomisation button first")
         } else {
           plot <- StroopPlot(group = group())
-          
+
         }
-        
+
         StopWatch$Start(treatment = group())
         active(TRUE)
-        
+
         return(plot)
-        
+
       })
-      
+
       output$stroop_plot <- renderPlot({
         stroopPlot()
       })
-      
+
       observeEvent(input$stop, {
         updateActionButton(inputId = "start", disabled = FALSE)
         updateActionButton(inputId = "stop", disabled = TRUE)
         StopWatch$Stop(treatment = group())
         currentDuration <-
           as.numeric(StopWatch[[paste0(group(), "Duration")]], format = "seconds")
-        
+
         # Reset State
         timer(0)
         active(FALSE)
-        
+
         showModal(modalDialog(
           tagList(
             value_box(
@@ -235,7 +235,7 @@ mod_stroop_test_server <-
           )
         ))
       })
-      
+
       observeEvent(input$confirm, {
         if (all(c(
           length(StopWatch$ControlDuration),
@@ -254,24 +254,24 @@ mod_stroop_test_server <-
           # Change to second group
           group(choices[!(choices %in% group())])
         }
-        
+
         # Enable the submit button if both the requiset times are available
         if (all(length(StopWatch$StroopDuration) &&
                 length(StopWatch$ControlDuration))) {
           updateActionButton(inputId = "submit", disabled = FALSE)
         }
-        
+
         removeModal()
       })
-      
+
       observeEvent(input$cancel, {
         removeModal()
       })
-      
+
       observeEvent(input$submit, {
         StopWatch$SetInitials(value = input$initials)
         StopWatch$SetGroup(value = input$group)
-        
+
         if (is.null(application_state$GoogleSheets)) {
           sendSweetAlert(
             session = session,
@@ -291,9 +291,9 @@ mod_stroop_test_server <-
           )
         } else {
           timediff <- StopWatch$StroopDuration - StopWatch$ControlDuration
-          
+
           text <- ifelse(timediff < 0, "quicker", "slower")
-          
+
           showModal(modalDialog(
             value_box(
               title = h2("Outcome"),
@@ -314,15 +314,15 @@ mod_stroop_test_server <-
               )
             )
           ))
-          
+
           saveData(
             id = application_state$GoogleSheets,
             data = StopWatch$GetData(),
             with_progress = TRUE
           )
         }
-        
-        
+
+
         # Resetting the State
         updateTextInput(inputId = "initials", value = "")
         updateActionButton(inputId = "start", disabled = TRUE)
@@ -337,11 +337,11 @@ mod_stroop_test_server <-
         })
         StopWatch$Reset()
       })
-      
+
       observeEvent(input$new_student,{
         removeModal()
       })
-      
+
       observeEvent(input$view_results,{
         trigger(UUIDgenerate())
         removeModal()

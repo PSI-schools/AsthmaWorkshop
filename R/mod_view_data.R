@@ -228,7 +228,6 @@ mod_view_data_server <- function(id, class_data, user_choices) {
               labels = c("Control", "Stroop"),
               values = c(colours$control, colours$stroop)
             ) +
-            facet_grid(rows = vars(Group)) +
             theme(
               panel.background = element_rect(fill = MyPallette$grey),
               panel.grid = element_line(),
@@ -468,7 +467,5 @@ mod_view_data_server <- function(id, class_data, user_choices) {
           renderText("Not quite, Please try again.")
       }
     })
-
-
   })
 }

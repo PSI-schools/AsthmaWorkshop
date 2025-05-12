@@ -4,36 +4,54 @@
 #' @description A function to reset the data from Googlesheets if
 #' the metadata is a specified date.
 #'
-#' This function is ran on loading of the application and
+#' This function runs on loading of the application to check if there is any
+#' data persisting from previous session and removes it.
 #'
-#' @param date
-#' @param id description
+#' @param id A Character vector. The UUID of the GoogleSheets document used for
+#'   persistent storage
+#' @param lag A Double. The period of time in days before day that data should
+#'   be retained from. See details.
+#' @details
+#' If a lag of one is supplied all from today and yesterday will be retained. All
+#' older data will be deleted.
+#' Date Age is attributed to the modified data meta data of the GoogleSheet.
 #' @return Silent. Function for side effects
+#' @importFrom lubridate ymd_hms today days
+#' @importFrom googledrive drive_find
+#' @importFrom googlesheets4 read_sheet sheet_write
 #' @noRd
 #' @export
 
-reset_data <- function(date = Sys.Date(), id) {
+reset_data <- function(id, lag = 0L) {
 
-  # Read the Google Sheet into a data frame
-  sheet_data <- read_sheet(sheet_url)
-
-  # Check if the metadata date column is equal to today's date
-  if (any(sheet_data$date != todays_date)) {
-    # Filter out rows where the date is not today (assuming 'date' column exists)
-    updated_data <- sheet_data %>%
-      filter(date == todays_date)
-
-    # If no data for today, remove all data
-    if (nrow(updated_data) == 0) {
-      # Delete all rows (clear the sheet)
-      range_delete(sheet_url, range = "A2:Z")
-      message("Data deleted as no valid records are for today.")
-    } else {
-      # Otherwise, write the valid data back
-      write_sheet(updated_data, sheet_url)
-      message("Data updated with today's valid records.")
-    }
+  if (is.null(id)) {
+    return(invisible(NULL))
   } else {
-    message("All data is already from today.")
+    availableSheets <- drive_find(type = "spreadsheet")
+
+    if (id %notin% availableSheets$id) {
+      warning(
+        sprintf(
+          "GoogleSheets id:%s does not exist or you do not have permission to access it",
+          id
+        )
+      )
+      return(invisible(NULL))
+    }
+
+    classDataTime <- ymd_hms(availableSheets[availableSheets$id == id, ][["drive_resource"]][[1L]][["modifiedTime"]], tz = "UTC")
+
+    if (isTRUE(classDataTime < today(tz = "UTC") - days(lag))) {
+      # Read just the headers
+      headers <- read_sheet(id, sheet = "Sheet1", n_max = 0)
+
+      # Re-write just the headers to clear everything else
+      sheet_write(data = headers[0, ],
+                  ss = id,
+                  sheet = "Sheet1")
+
+      message(sprintf("Old Data Records from %s Cleared", classDataTime))
+
+    }
   }
 }

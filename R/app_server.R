@@ -11,8 +11,8 @@
 email <- Sys.getenv("Email")
 GoogleSheetsID <- Sys.getenv("GoogleSheetsID")
 
-# See Readme Data
-# AsthmaWorkshop::reset_data(date = Sys.Date(), lag = NULL, id = GoogleSheetsID)
+# A lag of 0 will delete all data older than today
+# reset_data(lag = 0, id = GoogleSheetsID)
 
 app_server <- function(input, output, session) {
 
@@ -23,8 +23,10 @@ app_server <- function(input, output, session) {
 
   library(ggplot2)
   library(extrafont)
-  gs4_deauth()
-  drive_deauth()
+
+  # This lines are for checking Google auth locally
+  # gs4_deauth()
+  # drive_deauth()
 
   # See readme Authentication for details on maintaining this.
   drive_auth(cache = ".secrets", email = email)
