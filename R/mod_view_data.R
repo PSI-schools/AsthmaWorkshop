@@ -19,8 +19,7 @@ mod_view_data_ui <- function(id) {
       radioGroupButtons(
         inputId = ns("plot_type"),
         label = with_red_star("Plot"),
-        choices = c("Histogram" = "Histogram",
-                    "Boxplot" = "BoxPlot"),
+        choices = c("Histogram" = "Histogram", "Boxplot" = "BoxPlot"),
         # "CDF Plot" = "CDFPlot"
         # ,
         # "CI Plot" = "CIPlot"),
@@ -60,8 +59,8 @@ mod_view_data_ui <- function(id) {
         actionButton(inputId = ns("boxplot_submit"), label = "Submit"),
         textOutput(ns("boxplot_feedback"))
       )
-      
-      
+
+
       # ,
       # wellPanel(
       #   h2("Customise Plot"),
@@ -80,8 +79,7 @@ mod_view_data_ui <- function(id) {
       # )
     ),
     card_body(plotOutput(ns("plot")))
-  ),
-  full_screen = TRUE))
+  ), full_screen = TRUE))
 }
 
 #' view_data Server Functions
@@ -90,7 +88,7 @@ mod_view_data_ui <- function(id) {
 mod_view_data_server <- function(id, class_data, user_choices) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     boxplotQuestion <-
       reactiveValues(
         question = "A box and whisker plot displays the marks of students in a maths exam.
@@ -102,7 +100,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
         ChoiceD = "100%",
         Answer = "Choice B"
       )
-    
+
     histogramQuestion <-
       reactiveValues(
         question = "A histogram displays the number of hours students spent studying
@@ -114,25 +112,27 @@ mod_view_data_server <- function(id, class_data, user_choices) {
         ChoiceD = "The histogram shows a normal distribution.",
         Answer = "Choice A"
       )
-    
+
     output$plot <- renderPlot({
+      # Validation to ensure multiple unique data points for plots
+      # Otherwise display message.
+
       validate(
         need(
           nrow(class_data()) > 4 && length(unique(class_data()$Test)) > 1,
           "To visualise these data, there must be multiple unique datapoints!"
         )
       )
-      
-      
+
+
       switch(
         input$plot_type,
         "Histogram" = {
-          plot <- ggplot(data = class_data(),
-                         aes(
-                           x = Value,
-                           y = after_stat(count),
-                           fill = Test
-                         )) +
+          plot <- ggplot(data = class_data(), aes(
+            x = Value,
+            y = after_stat(count),
+            fill = Test
+          )) +
             geom_histogram(
               color = MyPallette$black,
               alpha = 0.7,
@@ -157,7 +157,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
               labels = c("Control", "Stroop"),
               values = c(colours$control, colours$stroop)
             ) +
-            # facet_grid(rows = vars(Group)) +
+             facet_grid(rows = vars(Test)) +
             theme(
               panel.background = element_rect(fill = MyPallette$grey),
               panel.grid = element_line(),
@@ -166,10 +166,8 @@ mod_view_data_server <- function(id, class_data, user_choices) {
                 linewidth = 0.25,
                 linetype = 1
               ),
-              axis.text = element_text(colour = MyPallette$black,
-                                       size = 20),
-              axis.title = element_text(colour = MyPallette$black,
-                                        size = 20),
+              axis.text = element_text(colour = MyPallette$black, size = 20),
+              axis.title = element_text(colour = MyPallette$black, size = 20),
               strip.text = element_text(
                 angle = 0,
                 size = 16,
@@ -185,13 +183,13 @@ mod_view_data_server <- function(id, class_data, user_choices) {
               legend.text = element_text(size = 14),
               legend.title = element_text(size = 16),
               legend.key.size = unit(1.5, "cm") ,
-              title.text = element_text(size = 16)
+              plot.title = element_text(size = 16)
             )
-          
+
           if (isTRUE(input$labels)) {
             mean <- mean(class_data()$Value)
             median <- median(class_data()$Value)
-            
+
             plot <- plot +
               geom_vline(
                 xintercept = mean,
@@ -206,7 +204,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
                 size = 1.5
               )
           }
-          
+
           if (isTRUE(input$density)) {
             plot <-
               plot + stat_density(geom = "line",
@@ -214,9 +212,9 @@ mod_view_data_server <- function(id, class_data, user_choices) {
                                   size =
                                     1)
           }
-          
+
           print(plot)
-          
+
         },
         "BoxPlot" = {
           plot <-
@@ -224,14 +222,13 @@ mod_view_data_server <- function(id, class_data, user_choices) {
             geom_boxplot(width = 1,
                          color = MyPallette$black,
                          alpha = 0.7) +
-            labs(x = "Time Taken (Seconds)",
-                 title = "Box and Whisker Plot Showing the Time Taken (Seconds) to Complete the Stroop Experiment and Control") +
+            labs(x = "Time Taken (Seconds)", title = "Box and Whisker Plot Showing the Time Taken (Seconds) to Complete the Stroop Experiment and Control") +
             scale_fill_manual(
               "Experiment",
               labels = c("Control", "Stroop"),
               values = c(colours$control, colours$stroop)
             ) +
-            # facet_grid(rows = vars(Group)) +
+            facet_grid(rows = vars(Group)) +
             theme(
               panel.background = element_rect(fill = MyPallette$grey),
               panel.grid = element_line(),
@@ -240,10 +237,8 @@ mod_view_data_server <- function(id, class_data, user_choices) {
                 linewidth = 0.25,
                 linetype = 1
               ),
-              axis.text.x = element_text(colour = MyPallette$black,
-                                         size = 20),
-              axis.title.x = element_text(colour = MyPallette$black,
-                                          size = 20),
+              axis.text.x = element_text(colour = MyPallette$black, size = 20),
+              axis.title.x = element_text(colour = MyPallette$black, size = 20),
               axis.line.y = element_blank(),
               axis.text.y = element_blank(),
               axis.ticks.y = element_blank(),
@@ -262,18 +257,20 @@ mod_view_data_server <- function(id, class_data, user_choices) {
               legend.text = element_text(size = 14),
               legend.title = element_text(size = 16),
               legend.key.size = unit(2.5, "cm"),
-              title.text = element_text(size = 16)
+              plot.title = element_text(size = 16)
             ) +
-            scale_x_continuous(breaks = seq(floor(min(
-              class_data()$Value
-            )), ceiling(max(
-              class_data()$Value
-            )), by = 2), 
-          label = seq(floor(min(
-            class_data()$Value
-          )), ceiling(max(
-            class_data()$Value
-          )), by = 2))
+            scale_x_continuous(
+              breaks = seq(floor(min(
+                class_data()$Value
+              )), ceiling(max(
+                class_data()$Value
+              )), by = 2),
+              label = seq(floor(min(
+                class_data()$Value
+              )), ceiling(max(
+                class_data()$Value
+              )), by = 2)
+            )
           print(plot)
         },
         "CDFPlot" = {
@@ -308,8 +305,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
               size = 10,
               alpha = 0.7
             ) +
-            labs(x = user_choices$ValueLabel,
-                 y = "Height (cm)") +
+            labs(x = user_choices$ValueLabel, y = "Height (cm)") +
             scale_fill_manual(
               "Group",
               labels = c("Group A", "Group B"),
@@ -323,23 +319,19 @@ mod_view_data_server <- function(id, class_data, user_choices) {
                 linewidth = 0.25,
                 linetype = 1
               ),
-              axis.text = element_text(colour = MyPallette$black,
-                                       size = 20),
-              axis.title = element_text(colour = MyPallette$black,
-                                        size = 20),
-              legend.text = element_text(colour = MyPallette$black,
-                                         size = 14),
-              legend.title = element_text(colour = MyPallette$black,
-                                          size = 14)
+              axis.text = element_text(colour = MyPallette$black, size = 20),
+              axis.title = element_text(colour = MyPallette$black, size = 20),
+              legend.text = element_text(colour = MyPallette$black, size = 14),
+              legend.title = element_text(colour = MyPallette$black, size = 14)
             )
-          
+
           if (isTRUE(input$labels)) {
             plot <-
               plot + geom_text(aes(labels = Initials),
                                size = 6,
                                nudge_y = 0.1)
           }
-          
+
           print(plot)
         },
         "CIPlot" = {
@@ -364,8 +356,8 @@ mod_view_data_server <- function(id, class_data, user_choices) {
               c = if_else(ci_lower > 0 |
                             ci_upper < 0, "1", "0")
             )
-          
-          
+
+
           # Plot
           plot <-  ggplot(data = summary_stats) +
             geom_segment(
@@ -382,8 +374,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
             geom_vline(aes(xintercept = 0),
                        color = MyPallette$black,
                        size = 1) +
-            labs(x = "Effect of Group (Drug - Control)",
-                 y = "Group") +
+            labs(x = "Effect of Group (Drug - Control)", y = "Group") +
             scale_color_manual(values = c("0" = MyPallette$red, "1" = MyPallette$green)) +
             scale_fill_manual(values = c("0" = MyPallette$red, "1" = MyPallette$green)) +
             annotate(
@@ -404,37 +395,37 @@ mod_view_data_server <- function(id, class_data, user_choices) {
               hjust = 0,
               size = 7
             )
-          
+
           print(plot)
-          
-          
+
+
         }
       )
     })
-    
+
     # Update the questions
     observeEvent(class_data(), {
       req(nrow(class_data()) > 4)
       histChoices <- HistogramQuestion(values = class_data()$Value)
-      
+
       boxChoices <-
         BoxPlotQuestion(values = class_data()$Value[class_data()$Test == "Stroop"], group = "Stroop")
-      
+
       boxplotQuestion$Question <- boxChoices[["Question"]]
       boxplotQuestion$ChoiceA <- boxChoices[["ChoiceA"]]
       boxplotQuestion$ChoiceB <- boxChoices[["ChoiceB"]]
       boxplotQuestion$ChoiceC <- boxChoices[["ChoiceC"]]
       boxplotQuestion$ChoiceD <- boxChoices[["ChoiceD"]]
       boxplotQuestion$Answer <- boxChoices[["Answer"]]
-      
+
       histogramQuestion$Question <- histChoices[["Question"]]
       histogramQuestion$ChoiceA <- histChoices[["ChoiceA"]]
       histogramQuestion$ChoiceB <- histChoices[["ChoiceB"]]
       histogramQuestion$ChoiceC <- histChoices[["ChoiceC"]]
       histogramQuestion$ChoiceD <- histChoices[["ChoiceD"]]
       histogramQuestion$Answer <- histChoices[["Answer"]]
-      
-      
+
+
       updateRadioButtons(
         inputId = "histogram_question",
         choices =           c(
@@ -444,7 +435,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
           histogramQuestion$ChoiceD
         )
       )
-      
+
       updateRadioButtons(
         inputId = "boxplot_question",
         label = boxplotQuestion$Question,
@@ -456,7 +447,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
         )
       )
     })
-    
+
     # Observe event when submit button is clicked
     observeEvent(input$hist_submit, {
       if (input$histogram_question == histogramQuestion$Answer) {
@@ -467,7 +458,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
           renderText("Not quite, Please try again.")
       }
     })
-    
+
     observeEvent(input$boxplot_submit, {
       if (input$boxplot_question == as.character(round(boxplotQuestion$Answer, 2))) {
         output$boxplot_feedback <-
@@ -477,7 +468,7 @@ mod_view_data_server <- function(id, class_data, user_choices) {
           renderText("Not quite, Please try again.")
       }
     })
-    
-    
+
+
   })
 }
